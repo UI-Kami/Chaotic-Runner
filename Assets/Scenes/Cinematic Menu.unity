@@ -410,7 +410,8 @@ MonoBehaviour:
   - {fileID: 1995899890860189636, guid: 93f3f4db2ccb77a47b1a4e482c5541b1, type: 3}
   - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
   - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
-  poolSize: 2
+  drunkDriverPrefab: {fileID: 2007314114330024776, guid: a56d6aeca9fbe3c4cb213451a40c42a6, type: 3}
+  poolSize: 6
   spawnDistanceAhead: 500
   respawnDistance: 300
   lanePositions:
@@ -420,6 +421,9 @@ MonoBehaviour:
   - 0.96
   laneY: 1.5
   carSpeed: 30
+  drunkSpawnChance: 0.05
+  drunkSpawnDistance: 180
+  drunkSpeed: 60
 --- !u!114 &515051208
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -236,7 +236,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 3926933660256365478, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -374,8 +374,8 @@ MonoBehaviour:
   - 1.64
   - 7.86
   powerY: 1
-  meteoriteInterval: 7
-  meteoriteSpawnHeight: 40
+  meteoriteInterval: 10
+  meteoriteSpawnHeight: 100
   meteoriteSpeed: 500
   meteoriteDestroyDelay: 0.5
   minMeteorsPerWave: 2
@@ -414,7 +414,8 @@ MonoBehaviour:
   - {fileID: 1995899890860189636, guid: 93f3f4db2ccb77a47b1a4e482c5541b1, type: 3}
   - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
   - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
-  poolSize: 20
+  drunkDriverPrefab: {fileID: 2007314114330024776, guid: a56d6aeca9fbe3c4cb213451a40c42a6, type: 3}
+  poolSize: 15
   spawnDistanceAhead: 400
   respawnDistance: 150
   lanePositions:
@@ -424,6 +425,10 @@ MonoBehaviour:
   - 7.56
   laneY: 1
   carSpeed: 150
+  drunkSpawnInterval: 100
+  drunkSpeed: 250
+  drunkAggroRange: 50
+  drunkSteerStrength: 6
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0
@@ -1052,7 +1057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7966943299509216985, guid: 7a3cea5b7a85cc6449e15c9cc28a250b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
