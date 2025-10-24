@@ -277,7 +277,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 84
   m_CollisionDetection: 0
 --- !u!65 &5554241574221336418
 BoxCollider:
@@ -316,8 +316,10 @@ MonoBehaviour:
   speed: 250
   aggroRange: 150
   steerStrength: 50
-  stabilityTorque: 10
-  selfDestructDelay: 7
+  yOffset: 0.5
+  swerveAmount: 2.5
+  swerveSpeed: 3
+  despawnDistance: 120
 --- !u!82 &-8851552305008326048
 AudioSource:
   m_ObjectHideFlags: 0

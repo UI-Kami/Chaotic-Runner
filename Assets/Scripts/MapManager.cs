@@ -69,7 +69,7 @@ public class TimedMapSpawner : MonoBehaviour
 
         if (startImmediately)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 8; i++)
                 SpawnNextMap();
         }
 

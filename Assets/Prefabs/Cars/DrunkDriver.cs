@@ -3,73 +3,70 @@
 [RequireComponent(typeof(Rigidbody))]
 public class DrunkDriverAI : MonoBehaviour
 {
-    [Header("References")]
     public Transform player;
-
-    [Header("Behavior Settings")]
     public float speed = 60f;
     public float aggroRange = 80f;
     public float steerStrength = 8f;
     public float yOffset = 0.5f;
-    public float despawnDistance = 80f;
+    public float swerveAmount = 2.5f;
+    public float swerveSpeed = 3f;
+    public float despawnDistance = 120f;
 
     private Rigidbody rb;
+    private float swerveTimer;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = false;
-        rb.useGravity = true;
+        rb.useGravity = false; // disable gravity so car stays on track
     }
 
     void FixedUpdate()
     {
         if (player == null) return;
 
-        // Ignore vertical difference for driving
-        Vector3 playerXZ = new Vector3(player.position.x, transform.position.y, player.position.z);
-        Vector3 toPlayer = playerXZ - transform.position;
+        // Horizontal drunken swerve
+        swerveTimer += Time.fixedDeltaTime * swerveSpeed;
+        float lateralOffset = Mathf.Sin(swerveTimer) * swerveAmount;
 
-        // If player within aggro range → chase
-        if (toPlayer.sqrMagnitude < aggroRange * aggroRange)
+        Vector3 targetPos = new Vector3(player.position.x + lateralOffset, yOffset, player.position.z);
+        Vector3 toPlayer = (targetPos - transform.position);
+        float distance = toPlayer.magnitude;
+
+        if (distance < aggroRange)
         {
-            Vector3 desiredDir = toPlayer.normalized;
-            Vector3 desiredVel = desiredDir * speed;
-
-            // Smooth steering
+            Vector3 desiredVel = toPlayer.normalized * speed;
             rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, desiredVel, Time.fixedDeltaTime * steerStrength);
-
-            // Rotate smoothly toward velocity direction
-            if (rb.linearVelocity.sqrMagnitude > 0.1f)
-            {
-                Quaternion lookRot = Quaternion.LookRotation(rb.linearVelocity.normalized, Vector3.up);
-                rb.MoveRotation(Quaternion.Slerp(rb.rotation, lookRot, Time.fixedDeltaTime * 3f));
-            }
         }
         else
         {
-            // Drive straight if not chasing
             rb.linearVelocity = Vector3.back * speed * 0.8f;
         }
 
-        // Keep car grounded with offset
+        // Smooth rotation
+        if (rb.linearVelocity.sqrMagnitude > 0.1f)
+        {
+            Quaternion lookRot = Quaternion.LookRotation(rb.linearVelocity.normalized, Vector3.up);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, lookRot, Time.fixedDeltaTime * 4f));
+        }
+
+        // Ground lock
         Vector3 pos = rb.position;
         pos.y = yOffset;
         rb.MovePosition(pos);
 
-        // Despawn if too far behind
+        // Cleanup if too far behind
         if (transform.position.z < player.position.z - despawnDistance)
-        {
             Destroy(gameObject);
-        }
     }
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Car") || other.gameObject.CompareTag("RedZone"))
+        if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Car"))
         {
             ExplosionManager.Instance?.SpawnCarExplosion(transform.position);
-            Destroy(gameObject, 0.05f);
+            Destroy(gameObject, 0.1f);
         }
     }
 }
