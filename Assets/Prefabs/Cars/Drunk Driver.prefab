@@ -240,7 +240,7 @@ Transform:
   m_GameObject: {fileID: 2007314114330024776}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.84681, y: 0, z: 2555.1357}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -260,7 +260,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2007314114330024776}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 20
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -314,10 +314,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DrunkDriverAI
   player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
   speed: 250
-  steerStrength: 5
-  aggroRange: 40
-  lifetime: 15
-  explosionPrefab: {fileID: 1121192042590650, guid: a91a87beae54268479c6bdf01fabb108, type: 3}
+  aggroRange: 150
+  steerStrength: 50
+  stabilityTorque: 10
+  selfDestructDelay: 7
 --- !u!82 &-8851552305008326048
 AudioSource:
   m_ObjectHideFlags: 0
