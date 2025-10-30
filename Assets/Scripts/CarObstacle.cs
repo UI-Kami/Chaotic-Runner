@@ -28,7 +28,7 @@ public class CarObstacle : MonoBehaviour
         if (playerAnim != null && playerAnim.IsSprinting())
         {
             ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
-            TimeManager.Instance?.TriggerSlowMotion(0.5f); // 🎬 Short slow-motion impact
+            TimeManager.Instance?.TriggerSlowMotion(2.5f); // 🎬 Short slow-motion impact
 
             // Optional: Add a knockback effect for realism
             Rigidbody rb = GetComponent<Rigidbody>();
@@ -42,7 +42,7 @@ public class CarObstacle : MonoBehaviour
 
         // 🚗 Normal collision (player NOT sprinting)
         ExplosionManager.Instance?.SpawnCarExplosion(transform.position);
-        TimeManager.Instance?.TriggerSlowMotion(0.8f); // 🕒 Dramatic crash effect
+        TimeManager.Instance?.TriggerSlowMotion(1.5f); // 🕒 Dramatic crash effect
 
         // Apply knockback to the player
         Rigidbody playerRb = collision.gameObject.GetComponent<Rigidbody>();

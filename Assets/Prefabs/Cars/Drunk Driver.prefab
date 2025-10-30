@@ -226,7 +226,7 @@ GameObject:
   - component: {fileID: -8851552305008326048}
   m_Layer: 0
   m_Name: Drunk Driver
-  m_TagString: Untagged
+  m_TagString: DrunkCar
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -276,9 +276,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 84
-  m_CollisionDetection: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!65 &5554241574221336418
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -313,13 +313,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrunkDriverAI
   player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  speed: 250
+  speed: 350
   aggroRange: 150
-  steerStrength: 50
-  yOffset: 0.5
-  swerveAmount: 2.5
-  swerveSpeed: 3
-  despawnDistance: 120
+  steerStrength: 100
+  yOffset: 0
+  despawnDistance: 200
 --- !u!82 &-8851552305008326048
 AudioSource:
   m_ObjectHideFlags: 0

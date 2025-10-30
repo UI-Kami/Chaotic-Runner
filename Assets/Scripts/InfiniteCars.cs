@@ -8,7 +8,6 @@ public class CarSpawnerPool : MonoBehaviour
     [Header("References")]
     public Transform player;
     public GameObject[] carPrefabs;
-    public GameObject drunkDriverPrefab;
 
     [Header("Pool Settings")]
     public int poolSize = 10;
@@ -22,21 +21,10 @@ public class CarSpawnerPool : MonoBehaviour
     [Header("Car Movement")]
     public float carSpeed = 25f;
 
-    [Header("Drunk Driver Settings")]
-    public float drunkSpawnMinDistance = 150f;
-    public float drunkSpawnMaxDistance = 200f;
-    public float drunkYOffset = 0.5f;
-    public float drunkSpeed = 60f;
-    public float drunkAggroRange = 80f;
-    public float drunkSteerStrength = 8f;
-    public int minDrunkCarsPerWave = 1;
-    public int maxDrunkCarsPerWave = 3;
-
     private readonly Queue<GameObject> carPool = new Queue<GameObject>();
     private readonly List<GameObject> activeCars = new List<GameObject>();
 
     private float nextSpawnZ;
-    private float nextDrunkSpawnZ;
     private bool initialized = false;
 
     private void Awake()
@@ -58,19 +46,18 @@ public class CarSpawnerPool : MonoBehaviour
         }
 
         InitializePool();
-
-        if (player)
-            nextDrunkSpawnZ = player.position.z + Random.Range(drunkSpawnMinDistance, drunkSpawnMaxDistance);
     }
 
     void InitializePool()
     {
+        // Clear any leftover cars
         foreach (Transform child in transform)
             Destroy(child.gameObject);
 
         carPool.Clear();
         activeCars.Clear();
 
+        // Create pooled cars
         for (int i = 0; i < poolSize; i++)
         {
             GameObject prefab = carPrefabs[Random.Range(0, carPrefabs.Length)];
@@ -92,20 +79,15 @@ public class CarSpawnerPool : MonoBehaviour
 
         MoveAndRecycleCars();
 
+        // Continuously spawn cars ahead
         while (nextSpawnZ < player.position.z + respawnDistance)
         {
             SpawnCar();
             nextSpawnZ += Random.Range(35f, 55f);
         }
-
-        // Drunk driver wave spawn
-        if (player.position.z >= nextDrunkSpawnZ)
-        {
-            SpawnDrunkDriverWave();
-            nextDrunkSpawnZ = player.position.z + Random.Range(drunkSpawnMinDistance, drunkSpawnMaxDistance);
-        }
     }
 
+    // 🚗 Move forward and recycle cars behind player
     void MoveAndRecycleCars()
     {
         for (int i = activeCars.Count - 1; i >= 0; i--)
@@ -117,9 +99,9 @@ public class CarSpawnerPool : MonoBehaviour
                 continue;
             }
 
-            if (car.GetComponent<DrunkDriverAI>() == null)
-                car.transform.Translate(Vector3.back * carSpeed * Time.deltaTime, Space.World);
+            car.transform.Translate(Vector3.back * carSpeed * Time.deltaTime, Space.World);
 
+            // Recycle when behind player
             if (car.transform.position.z < player.position.z - 25f)
             {
                 ReturnCarToPool(car);
@@ -128,6 +110,7 @@ public class CarSpawnerPool : MonoBehaviour
         }
     }
 
+    // 🚘 Spawns a pooled car in a random lane
     void SpawnCar()
     {
         GameObject car = GetCarFromPool();
@@ -141,38 +124,22 @@ public class CarSpawnerPool : MonoBehaviour
         activeCars.Add(car);
     }
 
-    // --- Drunk driver wave (fixed height + targeting) ---
-    void SpawnDrunkDriverWave()
+    // 🚦 Used by map manager for section-based spawns
+    public void SpawnCarOnMap(float mapStartZ, float mapEndZ)
     {
-        if (drunkDriverPrefab == null || player == null) return;
+        GameObject car = GetCarFromPool();
+        if (car == null) return;
 
-        int drunkCount = Random.Range(minDrunkCarsPerWave, maxDrunkCarsPerWave + 1);
+        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
+        float zPos = Random.Range(mapStartZ + 20f, mapEndZ - 20f);
+        Vector3 spawnPos = new Vector3(laneX, laneY, zPos);
 
-        for (int i = 0; i < drunkCount; i++)
-        {
-            float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-            float spawnZ = player.position.z + Random.Range(150f, 200f);
-            float spawnY = laneY + drunkYOffset;
-
-            Vector3 spawnPos = new Vector3(laneX, spawnY, spawnZ);
-            GameObject drunk = Instantiate(drunkDriverPrefab, spawnPos, Quaternion.identity);
-
-            DrunkDriverAI ai = drunk.GetComponent<DrunkDriverAI>();
-            if (ai != null)
-            {
-                ai.player = player;
-                ai.speed = drunkSpeed;
-                ai.aggroRange = drunkAggroRange;
-                ai.steerStrength = drunkSteerStrength;
-                ai.yOffset = laneY + drunkYOffset;
-            }
-
-            activeCars.Add(drunk);
-        }
-
-        Debug.Log($"🚗💥 Drunk driver wave spawned ({drunkCount})");
+        car.transform.SetPositionAndRotation(spawnPos, Quaternion.Euler(0f, 180f, 0f));
+        car.SetActive(true);
+        activeCars.Add(car);
     }
 
+    // ♻️ Pool helpers
     GameObject GetCarFromPool()
     {
         if (carPool.Count == 0)
@@ -197,12 +164,6 @@ public class CarSpawnerPool : MonoBehaviour
     {
         if (car == null) return;
 
-        if (car.GetComponent<DrunkDriverAI>() != null)
-        {
-            Destroy(car, 2f);
-            return;
-        }
-
         car.SetActive(false);
         car.transform.SetParent(transform, false);
 
@@ -210,35 +171,8 @@ public class CarSpawnerPool : MonoBehaviour
             carPool.Enqueue(car);
     }
 
-    public void SpawnCarOnMap(float mapStartZ, float mapEndZ)
+    public void SetPoolSize(int size)
     {
-        if (drunkDriverPrefab && Random.value < 0.08f)
-        {
-            float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-            float zPos = Random.Range(mapStartZ + 20f, mapEndZ - 20f);
-            float spawnY = laneY + drunkYOffset;
-
-            GameObject drunk = Instantiate(drunkDriverPrefab, new Vector3(laneX, spawnY, zPos), Quaternion.identity);
-            DrunkDriverAI ai = drunk.GetComponent<DrunkDriverAI>();
-            if (ai != null)
-            {
-                ai.player = player;
-                ai.speed = drunkSpeed;
-                ai.aggroRange = drunkAggroRange;
-                ai.steerStrength = drunkSteerStrength;
-                ai.yOffset = laneY + drunkYOffset;
-            }
-            activeCars.Add(drunk);
-            return;
-        }
-
-        GameObject car = GetCarFromPool();
-        if (car == null) return;
-
-        float lane = lanePositions[Random.Range(0, lanePositions.Length)];
-        float z = Random.Range(mapStartZ + 20f, mapEndZ - 20f);
-        car.transform.SetPositionAndRotation(new Vector3(lane, laneY, z), Quaternion.Euler(0f, 180f, 0f));
-        car.SetActive(true);
-        activeCars.Add(car);
+        poolSize = size;
     }
 }

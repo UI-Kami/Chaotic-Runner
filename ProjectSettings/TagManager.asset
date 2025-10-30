@@ -11,6 +11,7 @@ TagManager:
   - House
   - HighScoreText
   - ScoreText
+  - DrunkCar
   layers:
   - Default
   - TransparentFX

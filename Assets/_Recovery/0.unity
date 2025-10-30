@@ -149,18 +149,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrunkCarManager
   player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  drunkCarPrefab: {fileID: 2007314114330024776, guid: a56d6aeca9fbe3c4cb213451a40c42a6, type: 3}
+  drunkcarPrefab: {fileID: 2007314114330024776, guid: a56d6aeca9fbe3c4cb213451a40c42a6, type: 3}
+  spawnDistanceAhead: 250
+  respawnDistance: 500
   lanePositions:
   - -27
   - -21
   - 0.96
   - 6
-  laneY: 0.5
-  minSpawnAhead: 100
-  maxSpawnAhead: 150
-  yOffset: 0.5
-  spawnChancePerMap: 0.25
-  maxActiveDrunkCars: 1
+  laneY: 1.2
+  drunkcarSpeed: 250
+  steeringSpeed: 20
+  aggroRange: 150
+  swerveAmount: 15
+  swerveSpeed: 10
+  minspawnInterval: 5
+  maxspawnInterval: 10
 --- !u!4 &229146997
 Transform:
   m_ObjectHideFlags: 0
@@ -420,9 +424,9 @@ MonoBehaviour:
   mapLength: 200
   overlapFix: 2.5
   spawnInterval: 7
+  cleanupDistance: 150
   autoDetectLength: 1
   startImmediately: 1
-  defaultDestroyDelay: 2
   minPowerUpsPerMap: 4
   maxPowerUpsPerMap: 8
   lanePositions:
@@ -472,7 +476,7 @@ MonoBehaviour:
   - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
   - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
   poolSize: 20
-  spawnDistanceAhead: 250
+  spawnDistanceAhead: 400
   respawnDistance: 150
   lanePositions:
   - -27.94
@@ -480,7 +484,7 @@ MonoBehaviour:
   - 0.96
   - 7.56
   laneY: 1
-  carSpeed: 200
+  carSpeed: 150
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0

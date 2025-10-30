@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TimedMapSpawner : MonoBehaviour
@@ -16,9 +17,12 @@ public class TimedMapSpawner : MonoBehaviour
     public float mapLength = 200f;
     public float overlapFix = 0.5f;
     public float spawnInterval = 2f;
-    public float cleanupDistance = 300f; // how far behind player maps are destroyed
     public bool autoDetectLength = true;
     public bool startImmediately = true;
+
+    [Header("Map Destruction")]
+    [Tooltip("Delay before map is destroyed after hitting mapEnd trigger")]
+    public float defaultDestroyDelay = 2f;
 
     [Header("Power-Up Settings")]
     public int minPowerUpsPerMap = 0;
@@ -92,29 +96,11 @@ public class TimedMapSpawner : MonoBehaviour
         float dt = Mathf.Max(Time.deltaTime, 0.0001f);
         playerVelocity = (player.position - prevPlayerPos) / dt;
         prevPlayerPos = player.position;
-
-        // Destroy maps that are far behind the player
-        for (int i = activeMaps.Count - 1; i >= 0; i--)
-        {
-            GameObject map = activeMaps[i];
-            if (map == null)
-            {
-                activeMaps.RemoveAt(i);
-                continue;
-            }
-
-            float mapEndZ = map.transform.position.z + mapLength;
-            if (player.position.z - mapEndZ > cleanupDistance)
-            {
-                Destroy(map);
-                activeMaps.RemoveAt(i);
-            }
-        }
     }
 
     // --------------------------------------------------------------------
     // 🌠 Meteorite routine
-    private System.Collections.IEnumerator MeteoriteRoutine()
+    private IEnumerator MeteoriteRoutine()
     {
         while (true)
         {
@@ -175,9 +161,16 @@ public class TimedMapSpawner : MonoBehaviour
         Vector3 spawnPos = new Vector3(0f, 0f, currentZ);
         GameObject newMap = Instantiate(mapPrefab, spawnPos, Quaternion.identity);
         currentZ += mapLength - overlapFix;
-
         activeMaps.Add(newMap);
 
+        // Link mapEnd trigger (if exists)
+        MapEndTrigger endTrigger = newMap.GetComponentInChildren<MapEndTrigger>();
+        if (endTrigger != null)
+        {
+            endTrigger.spawner = this;
+        }
+
+        // Spawn cars + drunk car + powerups
         if (carSpawner != null)
         {
             float mapStartZ = spawnPos.z;
@@ -185,6 +178,8 @@ public class TimedMapSpawner : MonoBehaviour
             int carCount = Random.Range(1, 4);
             for (int i = 0; i < carCount; i++)
                 carSpawner.SpawnCarOnMap(mapStartZ, mapEndZ);
+
+            FindAnyObjectByType<DrunkCarSpawner>()?.OnNewMapSpawned(mapStartZ, mapEndZ);
         }
 
         SpawnPowerUps(newMap.transform.position.z, mapLength);
@@ -211,6 +206,28 @@ public class TimedMapSpawner : MonoBehaviour
         }
     }
 
+    // --------------------------------------------------------------------
+    // 🧹 Map destruction system (triggered by MapEndTrigger)
+    public void RequestDestroyMap(GameObject map, float delay = -1f)
+    {
+        if (map == null) return;
+        float d = delay > 0f ? delay : defaultDestroyDelay;
+        StartCoroutine(DestroyMapAfterDelay(map, d));
+    }
+
+    private IEnumerator DestroyMapAfterDelay(GameObject map, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (activeMaps.Contains(map))
+            activeMaps.Remove(map);
+
+        if (map != null)
+            Destroy(map);
+    }
+
+    // --------------------------------------------------------------------
+    // Utility
     private float GetMapLength(GameObject prefab)
     {
         Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
@@ -254,7 +271,6 @@ public class TimedMapSpawner : MonoBehaviour
             if (movingFire) movingFire.Stop();
             if (staticFire) staticFire.Stop();
 
-            // cinematic case
             if (GameMode.IsCinematic)
             {
                 ExplosionManager.Instance?.SpawnMeteorExplosion(transform.position);
@@ -271,7 +287,7 @@ public class TimedMapSpawner : MonoBehaviour
             else
             {
                 ExplosionManager.Instance?.SpawnMeteorExplosion(transform.position);
-                TimeManager.Instance?.TriggerSlowMotion(0.7f);
+                TimeManager.Instance?.TriggerSlowMotion(1.5f);
                 if (collision.gameObject.CompareTag("Player") && playerAnim != null)
                     playerAnim.TriggerDeath();
             }
