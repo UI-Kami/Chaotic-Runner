@@ -291,6 +291,10 @@ PrefabInstance:
       propertyPath: m_Depth
       value: -1
       objectReference: {fileID: 0}
+    - target: {fileID: 1192065984958237519, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: m_Constraints
+      value: 116
+      objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
       value: 0.01

@@ -25,10 +25,10 @@ public class TimedMapSpawner : MonoBehaviour
     public float defaultDestroyDelay = 2f;
 
     [Header("Power-Up Settings")]
-    public int minPowerUpsPerMap = 0;
-    public int maxPowerUpsPerMap = 2;
-    public float[] lanePositions = { -6f, -2f, 2f, 6f };
     public float powerY = 1.5f;
+    public float[] lanePositions = { -6f, -2f, 2f, 6f };
+    [Tooltip("Chance (0-1) that a power will spawn per map")]
+    public float powerSpawnChance = 0.4f;
 
     [Header("Meteorite Settings")]
     public float meteoriteInterval = 4f;
@@ -98,7 +98,6 @@ public class TimedMapSpawner : MonoBehaviour
         prevPlayerPos = player.position;
     }
 
-    // --------------------------------------------------------------------
     // 🌠 Meteorite routine
     private IEnumerator MeteoriteRoutine()
     {
@@ -152,7 +151,6 @@ public class TimedMapSpawner : MonoBehaviour
         Debug.Log($"☄️ Meteorite wave launched ({meteorCount} meteors)");
     }
 
-    // --------------------------------------------------------------------
     // 🌍 Map + Powerup Spawning
     private void SpawnNextMap()
     {
@@ -163,14 +161,15 @@ public class TimedMapSpawner : MonoBehaviour
         currentZ += mapLength - overlapFix;
         activeMaps.Add(newMap);
 
-        // Link mapEnd trigger (if exists)
+        // Link mapEnd trigger (auto-detects its map root)
         MapEndTrigger endTrigger = newMap.GetComponentInChildren<MapEndTrigger>();
         if (endTrigger != null)
         {
             endTrigger.spawner = this;
+            endTrigger.destroyDelay = defaultDestroyDelay;
         }
 
-        // Spawn cars + drunk car + powerups
+        // Spawn cars + drunk cars
         if (carSpawner != null)
         {
             float mapStartZ = spawnPos.z;
@@ -182,32 +181,29 @@ public class TimedMapSpawner : MonoBehaviour
             FindAnyObjectByType<DrunkCarSpawner>()?.OnNewMapSpawned(mapStartZ, mapEndZ);
         }
 
-        SpawnPowerUps(newMap.transform.position.z, mapLength);
+        // Random chance for powerup spawn
+        if (Random.value < powerSpawnChance)
+            SpawnPowerUpNearPlayer(newMap.transform.position.z, mapLength);
     }
 
-    private void SpawnPowerUps(float mapStartZ, float mapLength)
+    private void SpawnPowerUpNearPlayer(float mapStartZ, float mapLength)
     {
-        if (powerPrefab == null) return;
+        if (powerPrefab == null || player == null) return;
 
-        int powerCount = Random.Range(minPowerUpsPerMap, maxPowerUpsPerMap + 1);
-        for (int i = 0; i < powerCount; i++)
-        {
-            float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-            float zPos = Random.Range(mapStartZ + 10f, mapStartZ + mapLength - 10f);
-            Vector3 spawnPos = new(laneX, powerY, zPos);
+        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
+        float zOffset = Random.Range(30f, 80f); // closer to player
+        float zPos = player.position.z + zOffset;
 
-            GameObject power = Instantiate(powerPrefab, spawnPos, Quaternion.identity);
-            if (powerParent != null && powerParent.gameObject.scene.IsValid())
-                power.transform.SetParent(powerParent, true);
+        Vector3 spawnPos = new(laneX, powerY, zPos);
+        GameObject power = Instantiate(powerPrefab, spawnPos, Quaternion.identity);
+        if (powerParent != null && powerParent.gameObject.scene.IsValid())
+            power.transform.SetParent(powerParent, true);
 
-            PowerCleanup cleaner = power.AddComponent<PowerCleanup>();
-            cleaner.player = player;
-            cleaner.lifetime = 20f;
-        }
+        PowerCleanup cleaner = power.AddComponent<PowerCleanup>();
+        cleaner.parentMapZ = mapStartZ;
     }
 
-    // --------------------------------------------------------------------
-    // 🧹 Map destruction system (triggered by MapEndTrigger)
+    // 🧹 Map destruction
     public void RequestDestroyMap(GameObject map, float delay = -1f)
     {
         if (map == null) return;
@@ -217,17 +213,36 @@ public class TimedMapSpawner : MonoBehaviour
 
     private IEnumerator DestroyMapAfterDelay(GameObject map, float delay)
     {
+        if (map == null)
+            yield break; // map already destroyed, stop here
+
         yield return new WaitForSeconds(delay);
+
+        // Extra safeguard: make sure map still exists before touching it
+        if (map == null)
+            yield break;
 
         if (activeMaps.Contains(map))
             activeMaps.Remove(map);
 
+        // Clean up powerups safely (no access if map destroyed)
+        PowerCleanup[] allPowers = FindObjectsByType<PowerCleanup>(FindObjectsSortMode.None);
+        foreach (var p in allPowers)
+        {
+            if (p == null) continue; // avoid missing ref
+            if (Mathf.Abs(p.parentMapZ - map.transform.position.z) < 1f)
+            {
+                if (p.gameObject != null)
+                    Destroy(p.gameObject);
+            }
+        }
+
+        // Final null check before destroy
         if (map != null)
             Destroy(map);
     }
 
-    // --------------------------------------------------------------------
-    // Utility
+
     private float GetMapLength(GameObject prefab)
     {
         Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
@@ -238,7 +253,6 @@ public class TimedMapSpawner : MonoBehaviour
         return bounds.size.z;
     }
 
-    // --------------------------------------------------------------------
     // ⚡ Meteorite Destroyer
     public class MeteoriteDestroyer : MonoBehaviour
     {
@@ -306,11 +320,10 @@ public class TimedMapSpawner : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------------------------
     // ⚡ Power Cleanup
     public class PowerCleanup : MonoBehaviour
     {
-        public Transform player;
+        public float parentMapZ;
         public float lifetime = 30f;
         private float timer;
 
@@ -318,6 +331,12 @@ public class TimedMapSpawner : MonoBehaviour
         {
             timer += Time.deltaTime;
             if (timer >= lifetime)
+                Destroy(gameObject);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("Player"))
                 Destroy(gameObject);
         }
     }

@@ -1348,7 +1348,7 @@ Transform:
   m_GameObject: {fileID: 4203946022828046573}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.3, y: 0, z: 99.74}
+  m_LocalPosition: {x: -10.3, y: 0, z: 97.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1373,7 +1373,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 50, y: 25.281126, z: 0.1}
+  m_Size: {x: 50, y: 25.281126, z: 1}
   m_Center: {x: 0, y: 12.359437, z: 0}
 --- !u!114 &8165868936564837716
 MonoBehaviour:
@@ -1388,7 +1388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapEndTrigger
   spawner: {fileID: 0}
-  destroyDelay: 1.5
+  destroyDelay: 0.5
   playerTag: Player
 --- !u!1 &4400904304255723925
 GameObject:

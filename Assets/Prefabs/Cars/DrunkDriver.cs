@@ -76,7 +76,7 @@ public class DrunkDriverAI : MonoBehaviour
         if (rb.linearVelocity.sqrMagnitude > 0.1f)
         {
             Quaternion targetRot = Quaternion.LookRotation(rb.linearVelocity.normalized, Vector3.up);
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, Time.fixedDeltaTime * 20f));
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRot, Time.fixedDeltaTime * 50f));
         }
 
         // Despawn once behind the player
