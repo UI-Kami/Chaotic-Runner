@@ -21,20 +21,23 @@ public class TimedMapSpawner : MonoBehaviour
     public bool startImmediately = true;
 
     [Header("Map Destruction")]
-    [Tooltip("Delay before map is destroyed after hitting mapEnd trigger")]
     public float defaultDestroyDelay = 2f;
 
     [Header("Power-Up Settings")]
     public float powerY = 1.5f;
     public float[] lanePositions = { -6f, -2f, 2f, 6f };
-    [Tooltip("Chance (0-1) that a power will spawn per map")]
+    public float powerSpawnDistanceAhead = 120f;
+    public float powerRespawnDistance = 250f;
+    public float powerFallDestroyY = -5f;
     public float powerSpawnChance = 0.4f;
+    public int powerPoolSize = 5;
 
     [Header("Meteorite Settings")]
     public float meteoriteInterval = 4f;
     public float meteoriteSpawnHeight = 60f;
     public float meteoriteSpeed = 200f;
     public float meteoriteDestroyDelay = 1f;
+    public float meteoriteFallDestroyY = -10f;
     public int minMeteorsPerWave = 2;
     public int maxMeteorsPerWave = 6;
     public float meteoriteSpread = 10f;
@@ -42,7 +45,11 @@ public class TimedMapSpawner : MonoBehaviour
     private SkyDarkener_Builtin skyDarkener;
     private float timer;
     private float currentZ;
+    private float nextPowerSpawnZ;
+
     private readonly List<GameObject> activeMaps = new();
+    private readonly Queue<GameObject> powerPool = new();
+    private GameObject activePower = null;
 
     private Vector3 prevPlayerPos;
     private Vector3 playerVelocity;
@@ -77,7 +84,24 @@ public class TimedMapSpawner : MonoBehaviour
                 SpawnNextMap();
         }
 
+        InitializePowerPool();
+
+        if (player)
+            nextPowerSpawnZ = player.position.z + powerSpawnDistanceAhead;
+
         StartCoroutine(MeteoriteRoutine());
+    }
+
+    private void InitializePowerPool()
+    {
+        if (powerPrefab == null) return;
+
+        for (int i = 0; i < powerPoolSize; i++)
+        {
+            GameObject p = Instantiate(powerPrefab, powerParent);
+            p.SetActive(false);
+            powerPool.Enqueue(p);
+        }
     }
 
     private void Update()
@@ -96,6 +120,67 @@ public class TimedMapSpawner : MonoBehaviour
         float dt = Mathf.Max(Time.deltaTime, 0.0001f);
         playerVelocity = (player.position - prevPlayerPos) / dt;
         prevPlayerPos = player.position;
+
+        HandlePowerSpawning();
+    }
+
+    // ⚡ Power Spawning Logic (like cars)
+    private void HandlePowerSpawning()
+    {
+        // if active power still exists ahead, skip
+        if (activePower != null && activePower.activeSelf)
+        {
+            // if player has passed the power, recycle it
+            if (activePower.transform.position.z < player.position.z - 30f)
+                ReturnPowerToPool(activePower);
+
+            return;
+        }
+
+        // spawn a new one ahead when player approaches threshold
+        if (player.position.z + powerRespawnDistance > nextPowerSpawnZ)
+        {
+            TrySpawnPower();
+            nextPowerSpawnZ = player.position.z + Random.Range(200f, 300f);
+        }
+    }
+
+    private void TrySpawnPower()
+    {
+        if (powerPrefab == null || player == null || powerPool.Count == 0)
+            return;
+
+        if (Random.value > powerSpawnChance) return;
+
+        GameObject power = powerPool.Dequeue();
+        power.SetActive(true);
+
+        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
+        float spawnZ = player.position.z + Random.Range(80f, 150f);
+        Vector3 spawnPos = new Vector3(laneX, powerY, spawnZ);
+
+        power.transform.position = spawnPos;
+        power.transform.rotation = Quaternion.identity;
+
+        PowerCleanup cleaner = power.GetComponent<PowerCleanup>();
+        if (cleaner == null)
+            cleaner = power.AddComponent<PowerCleanup>();
+
+        cleaner.fallDestroyY = powerFallDestroyY;
+        cleaner.SetupAutoDestroy(player);
+        cleaner.SetPoolReference(this);
+
+        activePower = power;
+    }
+
+    public void ReturnPowerToPool(GameObject power)
+    {
+        if (power == null) return;
+        power.SetActive(false);
+        if (!powerPool.Contains(power))
+            powerPool.Enqueue(power);
+        if (activePower == power)
+            activePower = null;
     }
 
     // 🌠 Meteorite routine
@@ -146,12 +231,13 @@ public class TimedMapSpawner : MonoBehaviour
 
             MeteoriteDestroyer destroyer = meteor.AddComponent<MeteoriteDestroyer>();
             destroyer.DestroyDelay = meteoriteDestroyDelay;
+            destroyer.fallDestroyY = meteoriteFallDestroyY;
         }
 
         Debug.Log($"☄️ Meteorite wave launched ({meteorCount} meteors)");
     }
 
-    // 🌍 Map + Powerup Spawning
+    // 🌍 Map spawning
     private void SpawnNextMap()
     {
         if (mapPrefab == null) return;
@@ -161,7 +247,6 @@ public class TimedMapSpawner : MonoBehaviour
         currentZ += mapLength - overlapFix;
         activeMaps.Add(newMap);
 
-        // Link mapEnd trigger (auto-detects its map root)
         MapEndTrigger endTrigger = newMap.GetComponentInChildren<MapEndTrigger>();
         if (endTrigger != null)
         {
@@ -169,7 +254,6 @@ public class TimedMapSpawner : MonoBehaviour
             endTrigger.destroyDelay = defaultDestroyDelay;
         }
 
-        // Spawn cars + drunk cars
         if (carSpawner != null)
         {
             float mapStartZ = spawnPos.z;
@@ -180,27 +264,6 @@ public class TimedMapSpawner : MonoBehaviour
 
             FindAnyObjectByType<DrunkCarSpawner>()?.OnNewMapSpawned(mapStartZ, mapEndZ);
         }
-
-        // Random chance for powerup spawn
-        if (Random.value < powerSpawnChance)
-            SpawnPowerUpNearPlayer(newMap.transform.position.z, mapLength);
-    }
-
-    private void SpawnPowerUpNearPlayer(float mapStartZ, float mapLength)
-    {
-        if (powerPrefab == null || player == null) return;
-
-        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-        float zOffset = Random.Range(30f, 80f); // closer to player
-        float zPos = player.position.z + zOffset;
-
-        Vector3 spawnPos = new(laneX, powerY, zPos);
-        GameObject power = Instantiate(powerPrefab, spawnPos, Quaternion.identity);
-        if (powerParent != null && powerParent.gameObject.scene.IsValid())
-            power.transform.SetParent(powerParent, true);
-
-        PowerCleanup cleaner = power.AddComponent<PowerCleanup>();
-        cleaner.parentMapZ = mapStartZ;
     }
 
     // 🧹 Map destruction
@@ -213,36 +276,17 @@ public class TimedMapSpawner : MonoBehaviour
 
     private IEnumerator DestroyMapAfterDelay(GameObject map, float delay)
     {
-        if (map == null)
-            yield break; // map already destroyed, stop here
-
+        if (map == null) yield break;
         yield return new WaitForSeconds(delay);
-
-        // Extra safeguard: make sure map still exists before touching it
-        if (map == null)
-            yield break;
+        if (map == null) yield break;
 
         if (activeMaps.Contains(map))
             activeMaps.Remove(map);
 
-        // Clean up powerups safely (no access if map destroyed)
-        PowerCleanup[] allPowers = FindObjectsByType<PowerCleanup>(FindObjectsSortMode.None);
-        foreach (var p in allPowers)
-        {
-            if (p == null) continue; // avoid missing ref
-            if (Mathf.Abs(p.parentMapZ - map.transform.position.z) < 1f)
-            {
-                if (p.gameObject != null)
-                    Destroy(p.gameObject);
-            }
-        }
-
-        // Final null check before destroy
-        if (map != null)
-            Destroy(map);
+        Destroy(map);
     }
 
-
+    // Utility
     private float GetMapLength(GameObject prefab)
     {
         Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
@@ -257,87 +301,48 @@ public class TimedMapSpawner : MonoBehaviour
     public class MeteoriteDestroyer : MonoBehaviour
     {
         public float DestroyDelay = 1f;
-        public float shakeIntensity = 1.2f;
-        public float shakeDuration = 0.5f;
+        public float fallDestroyY = -10f;
 
-        private Light fireLight;
-        private ParticleSystem staticFire;
-        private ParticleSystem movingFire;
-
-        private void Start()
+        void Update()
         {
-            staticFire = GetParticleByName("Fire_Static");
-            movingFire = GetParticleByName("Fire_Moving");
-            fireLight = GetComponentInChildren<Light>();
-
-            if (staticFire) staticFire.Play();
-            if (movingFire) movingFire.Play();
-        }
-
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (!collision.gameObject.CompareTag("Player") &&
-                !collision.gameObject.CompareTag("RedZone") &&
-                !collision.gameObject.CompareTag("House"))
-                return;
-
-            if (fireLight) fireLight.enabled = false;
-            if (movingFire) movingFire.Stop();
-            if (staticFire) staticFire.Stop();
-
-            if (GameMode.IsCinematic)
-            {
-                ExplosionManager.Instance?.SpawnMeteorExplosion(transform.position);
-                Destroy(gameObject, DestroyDelay);
-                return;
-            }
-
-            PlayerAnimation playerAnim = collision.gameObject.GetComponent<PlayerAnimation>();
-            if (collision.gameObject.CompareTag("Player") && playerAnim != null && playerAnim.IsSprinting())
-            {
-                ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
-                TimeManager.Instance?.TriggerSlowMotion(0.5f);
-            }
-            else
-            {
-                ExplosionManager.Instance?.SpawnMeteorExplosion(transform.position);
-                TimeManager.Instance?.TriggerSlowMotion(1.5f);
-                if (collision.gameObject.CompareTag("Player") && playerAnim != null)
-                    playerAnim.TriggerDeath();
-            }
-
-            CameraShake.Instance?.ShakeCamera(shakeIntensity, shakeDuration);
-            Destroy(gameObject, DestroyDelay);
-
-            SkyDarkener_Builtin sky = FindAnyObjectByType<SkyDarkener_Builtin>();
-            sky?.UnregisterMeteor();
-        }
-
-        private ParticleSystem GetParticleByName(string name)
-        {
-            Transform t = transform.Find(name);
-            return t ? t.GetComponent<ParticleSystem>() : null;
+            if (transform.position.y < fallDestroyY)
+                Destroy(gameObject);
         }
     }
 
-    // ⚡ Power Cleanup
+    // ⚡ Power Cleanup (returns to pool)
     public class PowerCleanup : MonoBehaviour
     {
-        public float parentMapZ;
-        public float lifetime = 30f;
-        private float timer;
+        public float fallDestroyY = -5f;
+        private Transform player;
+        private float destroyBehindDistance = 30f;
+        private TimedMapSpawner poolManager;
 
-        private void Update()
+        public void SetupAutoDestroy(Transform playerTransform)
         {
-            timer += Time.deltaTime;
-            if (timer >= lifetime)
-                Destroy(gameObject);
+            player = playerTransform;
+        }
+
+        public void SetPoolReference(TimedMapSpawner spawner)
+        {
+            poolManager = spawner;
+        }
+
+        void Update()
+        {
+            if (transform.position.y < fallDestroyY ||
+                (player != null && transform.position.z < player.position.z - destroyBehindDistance))
+            {
+                poolManager?.ReturnPowerToPool(gameObject);
+            }
         }
 
         private void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Player"))
-                Destroy(gameObject);
+            {
+                poolManager?.ReturnPowerToPool(gameObject);
+            }
         }
     }
 }

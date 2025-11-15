@@ -230,7 +230,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &949532754306645907
 Transform:
   m_ObjectHideFlags: 0
@@ -313,11 +313,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrunkDriverAI
   player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  speed: 350
-  aggroRange: 150
+  baseSpeed: 250
   steerStrength: 100
+  aggroRange: 150
   yOffset: 0
+  swerveAmount: 3
+  swerveSpeed: 4
   despawnDistance: 200
+  fallDestroyY: -5
+  fallDestroyDelay: 2
 --- !u!82 &-8851552305008326048
 AudioSource:
   m_ObjectHideFlags: 0

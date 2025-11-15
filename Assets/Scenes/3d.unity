@@ -135,7 +135,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &229146996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,8 +159,8 @@ MonoBehaviour:
   minSpawnAhead: 100
   maxSpawnAhead: 150
   yOffset: 0.5
-  spawnChancePerMap: 0.25
-  maxActiveDrunkCars: 1
+  spawnChancePerMap: 1
+  maxActiveDrunkCars: 5
 --- !u!4 &229146997
 Transform:
   m_ObjectHideFlags: 0
@@ -297,7 +297,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3926933660256365478, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -427,20 +427,25 @@ MonoBehaviour:
   autoDetectLength: 1
   startImmediately: 1
   defaultDestroyDelay: 2
-  minPowerUpsPerMap: 4
-  maxPowerUpsPerMap: 8
+  powerY: 1
   lanePositions:
   - -27.96
-  - -20.68
-  - 1.64
-  - 7.86
-  powerY: 1
+  - -21.68
+  - -13.3
+  - -7.86
+  - 0.7
+  - 6.5
+  powerSpawnChance: 1
+  powerSpawnInterval: 4
+  powerNearPlayerRange: 50
+  powerFallDestroyY: -5
   meteoriteInterval: 10
   meteoriteSpawnHeight: 100
   meteoriteSpeed: 500
   meteoriteDestroyDelay: 0.5
-  minMeteorsPerWave: 2
-  maxMeteorsPerWave: 4
+  meteoriteFallDestroyY: -10
+  minMeteorsPerWave: 1
+  maxMeteorsPerWave: 3
   meteoriteSpread: 10
 --- !u!4 &502562899
 Transform:
@@ -481,8 +486,10 @@ MonoBehaviour:
   lanePositions:
   - -27.94
   - -21.5
-  - 0.96
-  - 7.56
+  - -13.3
+  - -7.86
+  - 0.7
+  - 6.5
   laneY: 1
   carSpeed: 200
 --- !u!1 &753032868

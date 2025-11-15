@@ -15,7 +15,7 @@ public class CarSpawnerPool : MonoBehaviour
     [Header("Spawn Settings")]
     public float spawnDistanceAhead = 120f;
     public float respawnDistance = 250f;
-    public float[] lanePositions = { -27f, -21f, 0.96f, 6f };
+    public float[] lanePositions = { -27f, -21f, -12.37f, -7.17f, 0.96f, 6f };
     public float laneY = 0.5f;
 
     [Header("Car Movement")]
