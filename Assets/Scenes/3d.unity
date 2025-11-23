@@ -297,7 +297,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 3926933660256365478, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -435,10 +435,11 @@ MonoBehaviour:
   - -7.86
   - 0.7
   - 6.5
-  powerSpawnChance: 1
-  powerSpawnInterval: 4
-  powerNearPlayerRange: 50
+  powerSpawnDistanceAhead: 120
+  powerRespawnDistance: 250
   powerFallDestroyY: -5
+  powerSpawnChance: 1
+  powerPoolSize: 5
   meteoriteInterval: 10
   meteoriteSpawnHeight: 100
   meteoriteSpeed: 500
