@@ -427,7 +427,7 @@ MonoBehaviour:
   autoDetectLength: 1
   startImmediately: 1
   defaultDestroyDelay: 2
-  powerY: 1
+  powerY: 1.5
   lanePositions:
   - -27.96
   - -21.68
@@ -438,16 +438,17 @@ MonoBehaviour:
   powerSpawnDistanceAhead: 120
   powerRespawnDistance: 250
   powerFallDestroyY: -5
-  powerSpawnChance: 1
   powerPoolSize: 5
   meteoriteInterval: 10
   meteoriteSpawnHeight: 100
-  meteoriteSpeed: 500
+  meteoriteSpeed: 550
   meteoriteDestroyDelay: 0.5
   meteoriteFallDestroyY: -10
   minMeteorsPerWave: 1
   maxMeteorsPerWave: 3
-  meteoriteSpread: 10
+  meteoriteSpread: 8
+  meteorShakeIntensity: 1.2
+  meteorShakeDuration: 0.8
 --- !u!4 &502562899
 Transform:
   m_ObjectHideFlags: 0
@@ -492,7 +493,7 @@ MonoBehaviour:
   - 0.7
   - 6.5
   laneY: 1
-  carSpeed: 200
+  carSpeed: 450
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0

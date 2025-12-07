@@ -12,6 +12,7 @@ TagManager:
   - HighScoreText
   - ScoreText
   - DrunkCar
+  - Power
   layers:
   - Default
   - TransparentFX

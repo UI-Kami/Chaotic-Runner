@@ -30,17 +30,24 @@ public class SprintPower : MonoBehaviour
             if (anim != null)
                 anim.ActivateSprintBoost(sprintDuration);
 
-            // 🔊 Play pickup sound
+            // Play pickup sound locally
             PlayPickupSound();
 
-            // 💥 Optional: Add VFX here later
-
-            // Destroy object after sound plays (short delay)
-            Destroy(gameObject, 0.05f);
+            // If this instance is pooled, return it to the pool via PowerCleanup.
+            // Otherwise fallback to destroying the object (non-pooled usage).
+            var cleanup = GetComponent<TimedMapSpawner.PowerCleanup>();
+            if (cleanup != null)
+            {
+                cleanup.HandlePickup();
+            }
+            else
+            {
+                Destroy(gameObject, 0.05f);
+            }
         }
     }
 
-    private void PlayPickupSound()
+    public void PlayPickupSound()
     {
         if (pickupSound != null)
         {
