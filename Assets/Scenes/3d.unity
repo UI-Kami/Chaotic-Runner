@@ -297,7 +297,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 3926933660256365478, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -334,6 +334,18 @@ PrefabInstance:
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: normalSpeed
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: sprintSpeed
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: horizontalSpeed
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7024137703562051979, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_IsActive
@@ -421,9 +433,10 @@ MonoBehaviour:
   powerParent: {fileID: 1427595367}
   meteoritePrefab: {fileID: 7965121537336436597, guid: 3b83e51762d0cd444b1b35f9c750d386, type: 3}
   player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+  roadObstacles: {fileID: 0}
   mapLength: 200
   overlapFix: 2.5
-  spawnInterval: 7
+  spawnInterval: 3
   autoDetectLength: 1
   startImmediately: 1
   defaultDestroyDelay: 2
@@ -440,8 +453,8 @@ MonoBehaviour:
   powerFallDestroyY: -5
   powerPoolSize: 5
   meteoriteInterval: 10
-  meteoriteSpawnHeight: 100
-  meteoriteSpeed: 550
+  meteoriteSpawnHeight: 50
+  meteoriteSpeed: 1000
   meteoriteDestroyDelay: 0.5
   meteoriteFallDestroyY: -10
   minMeteorsPerWave: 1
@@ -987,6 +1000,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1345862129
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1345862131}
+  - component: {fileID: 1345862130}
+  m_Layer: 0
+  m_Name: RoadObstaclesManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1345862130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345862129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a0afd9a02d556b48872046a7d7139d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadObstacles
+  obstaclePrefab:
+  - {fileID: 4514240677770663834, guid: a560c352c45bb1741b05bf7ff81f3033, type: 3}
+  - {fileID: 6113491147185076907, guid: c29048e16c833d64591886ab3c7567e1, type: 3}
+  - {fileID: 3136019669004725227, guid: 1ebf2f8036ddac944b043262071dad32, type: 3}
+  - {fileID: 3385198684153423994, guid: b944dd0b0192b0c40bd354db9daa93da, type: 3}
+  poolSize: 20
+  minPerLane: 1
+  maxPerLane: 3
+  obstacleY: 0
+--- !u!4 &1345862131
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345862129}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -9.87946, y: 13.44315, z: 104.56306}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1427595366
 GameObject:
   m_ObjectHideFlags: 0
@@ -1264,3 +1330,4 @@ SceneRoots:
   - {fileID: 288930898}
   - {fileID: 1343949971}
   - {fileID: 229146997}
+  - {fileID: 1345862131}

@@ -12,6 +12,7 @@ public class TimedMapSpawner : MonoBehaviour
     public Transform powerParent;
     public GameObject meteoritePrefab;
     public Transform player;
+    public RoadObstacles roadObstacles; // <-- obstacle manager reference
 
     [Header("Map Settings")]
     public float mapLength = 200f;
@@ -83,6 +84,12 @@ public class TimedMapSpawner : MonoBehaviour
         }
 
         InitializePowerPool();
+
+        // auto-find RoadObstacles manager if not assigned in inspector
+        if (roadObstacles == null)
+            roadObstacles = FindAnyObjectByType<RoadObstacles>();
+        // ensure pool initialized (RoadObstacles.InitializePool is safe to call even if Awake did it)
+        roadObstacles?.InitializePool();
 
         StartCoroutine(MeteoriteRoutine());
     }
@@ -267,6 +274,10 @@ public class TimedMapSpawner : MonoBehaviour
         currentZ += mapLength - overlapFix;
         activeMaps.Add(newMap);
 
+        // compute start/end Z for this map
+        float mapStartZ = spawnPos.z;
+        float mapEndZ = mapStartZ + mapLength;
+
         MapEndTrigger endTrigger = newMap.GetComponentInChildren<MapEndTrigger>();
         if (endTrigger != null)
         {
@@ -276,8 +287,6 @@ public class TimedMapSpawner : MonoBehaviour
 
         if (carSpawner != null)
         {
-            float mapStartZ = spawnPos.z;
-            float mapEndZ = mapStartZ + mapLength;
             int carCount = Random.Range(1, 4);
             for (int i = 0; i < carCount; i++)
                 carSpawner.SpawnCarOnMap(mapStartZ, mapEndZ);
@@ -287,6 +296,12 @@ public class TimedMapSpawner : MonoBehaviour
 
         // spawn 2-3 powers on this map at random lanes
         SpawnPowersOnMap(newMap);
+
+        // spawn obstacles on this map (each lane gets multiple obstacles)
+        if (roadObstacles != null)
+        {
+            roadObstacles.SpawnObstaclesForMap(newMap, lanePositions, mapStartZ, mapEndZ);
+        }
     }
 
     // 🧹 Map destruction
@@ -301,6 +316,18 @@ public class TimedMapSpawner : MonoBehaviour
         {
             if (c == null || c.gameObject == null) continue;
             ReturnPowerToPool(c.gameObject);
+        }
+
+        // Return obstacles on this map to the obstacle pool (if manager available)
+        if (roadObstacles != null)
+        {
+            roadObstacles.ReturnObstaclesOnMap(map);
+        }
+        else
+        {
+            // defensive fallback: attempt to find ObstacleCleanup and remove/destroy them
+            var fallback = map.GetComponentsInChildren(typeof(MonoBehaviour), true);
+            // nothing further here — if you rely on RoadObstacles, assign it in the Inspector.
         }
 
         StartCoroutine(DestroyMapAfterDelay(map, d));
@@ -432,4 +459,3 @@ public class TimedMapSpawner : MonoBehaviour
         }
     }
 }
-    

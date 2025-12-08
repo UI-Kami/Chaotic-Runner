@@ -403,6 +403,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CarObstacle
   pushForce: 10
   liftForce: 5
+  fallDestroyY: -5
+  fallDestroyDelay: 2
 --- !u!82 &-7551198031126755240
 AudioSource:
   m_ObjectHideFlags: 0
@@ -416,7 +418,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 7a0e61d0137807046bf48445a8557f12, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.03
+  m_Volume: 0.001
   m_Pitch: 1
   Loop: 0
   Mute: 0
