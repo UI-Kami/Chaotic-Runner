@@ -281,8 +281,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d9bc5276053b1644b99794eedade057, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CarObstacle
-  pushForce: 10
-  liftForce: 5
+  pushForce: 100
+  liftForce: 20
   fallDestroyY: -5
   fallDestroyDelay: 2
 --- !u!82 &463048359993371498

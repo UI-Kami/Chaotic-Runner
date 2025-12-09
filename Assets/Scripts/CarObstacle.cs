@@ -3,7 +3,7 @@
 [RequireComponent(typeof(Collider))]
 public class CarObstacle : MonoBehaviour
 {
-    public float pushForce = 50f;
+    public float pushForce = 150f;
     public float liftForce = 20f;
     public float fallDestroyY = -5f; // 🔥 Below this height, destroy
     public float fallDestroyDelay = 2f;

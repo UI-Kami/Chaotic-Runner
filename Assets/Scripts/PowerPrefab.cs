@@ -35,7 +35,7 @@ public class SprintPower : MonoBehaviour
 
             // If this instance is pooled, return it to the pool via PowerCleanup.
             // Otherwise fallback to destroying the object (non-pooled usage).
-            var cleanup = GetComponent<TimedMapSpawner.PowerCleanup>();
+            var cleanup = GetComponent<PowerSpawner.PowerCleanup>();
             if (cleanup != null)
             {
                 cleanup.HandlePickup();

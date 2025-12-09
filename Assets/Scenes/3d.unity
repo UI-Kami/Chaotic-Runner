@@ -396,6 +396,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+--- !u!4 &498470741 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+  m_PrefabInstance: {fileID: 498470740}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &502562897
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,7 +410,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 502562899}
-  - component: {fileID: 502562898}
+  - component: {fileID: 502562903}
+  - component: {fileID: 502562904}
+  - component: {fileID: 502562901}
   - component: {fileID: 502562900}
   m_Layer: 0
   m_Name: GameManager
@@ -414,54 +421,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &502562898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 502562897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c9dd5a0c7cbeae4583a6991d80986a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MapManager
-  mapPrefab: {fileID: 8530151418778490212, guid: cafcac129354bf44ba6305a4df518f04, type: 3}
-  spawnOrigin: {fileID: 0}
-  carSpawner: {fileID: 502562900}
-  powerPrefab: {fileID: 7904724486694206302, guid: a1dc4e0947b2b914ab4826abec68472b, type: 3}
-  powerParent: {fileID: 1427595367}
-  meteoritePrefab: {fileID: 7965121537336436597, guid: 3b83e51762d0cd444b1b35f9c750d386, type: 3}
-  player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  roadObstacles: {fileID: 0}
-  mapLength: 200
-  overlapFix: 2.5
-  spawnInterval: 3
-  autoDetectLength: 1
-  startImmediately: 1
-  defaultDestroyDelay: 2
-  powerY: 1.5
-  lanePositions:
-  - -27.96
-  - -21.68
-  - -13.3
-  - -7.86
-  - 0.7
-  - 6.5
-  powerSpawnDistanceAhead: 120
-  powerRespawnDistance: 250
-  powerFallDestroyY: -5
-  powerPoolSize: 5
-  meteoriteInterval: 10
-  meteoriteSpawnHeight: 50
-  meteoriteSpeed: 1000
-  meteoriteDestroyDelay: 0.5
-  meteoriteFallDestroyY: -10
-  minMeteorsPerWave: 1
-  maxMeteorsPerWave: 3
-  meteoriteSpread: 8
-  meteorShakeIntensity: 1.2
-  meteorShakeDuration: 0.8
 --- !u!4 &502562899
 Transform:
   m_ObjectHideFlags: 0
@@ -486,27 +445,84 @@ MonoBehaviour:
   m_GameObject: {fileID: 502562897}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a97a04f78d282be40b9199081260a583, type: 3}
+  m_Script: {fileID: 11500000, guid: 46d84e8d3721f83458168a55d16736aa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CarSpawnerPool
-  player: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  carPrefabs:
-  - {fileID: 356776896206440, guid: f2028a7d8d4935343bccd922adafd42d, type: 3}
-  - {fileID: 1995899890860189636, guid: 93f3f4db2ccb77a47b1a4e482c5541b1, type: 3}
-  - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
-  - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
-  poolSize: 20
-  spawnDistanceAhead: 250
-  respawnDistance: 150
+  m_EditorClassIdentifier: Assembly-CSharp::PowerSpawner
+  powerPrefab: {fileID: 7904724486694206302, guid: a1dc4e0947b2b914ab4826abec68472b, type: 3}
+  powerParent: {fileID: 1427595367}
+  powerY: 1.5
   lanePositions:
-  - -27.94
-  - -21.5
-  - -13.3
-  - -7.86
-  - 0.7
-  - 6.5
-  laneY: 1
-  carSpeed: 450
+  - -27
+  - -21
+  - -12.37
+  - -7.17
+  - 0.96
+  - 6
+  powerFallDestroyY: -5
+  powerPoolSize: 5
+--- !u!114 &502562901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502562897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42a188221a0fc6848a16658464a1edc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteSpawner
+  mapManager: {fileID: 502562903}
+  player: {fileID: 498470741}
+  meteoritePrefab: {fileID: 7965121537336436597, guid: 3b83e51762d0cd444b1b35f9c750d386, type: 3}
+  meteoriteInterval: 20
+  meteoriteSpawnHeight: 100
+  meteoriteSpeed: 650
+  meteoriteDestroyDelay: 2
+  meteoriteFallDestroyY: -10
+  minMeteorsPerWave: 1
+  maxMeteorsPerWave: 3
+  meteoriteSpread: 10
+  meteorShakeIntensity: 1.5
+  meteorShakeDuration: 1
+--- !u!114 &502562903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502562897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36de89e85efec6744931c10a311ccf31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapManager
+  mapPrefab: {fileID: 8530151418778490212, guid: cafcac129354bf44ba6305a4df518f04, type: 3}
+  spawnOrigin: {fileID: 1427595367}
+  mapLength: 200
+  overlapFix: 2.5
+  autoDetectLength: 1
+  startImmediately: 1
+  defaultDestroyDelay: 2
+  carSpawner: {fileID: 952538920}
+  powerSpawner: {fileID: 502562900}
+  roadObstacles: {fileID: 1345862130}
+--- !u!114 &502562904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502562897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 503ad43e612caa142b8952fffbed34c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TimedMapSpawner
+  mapManager: {fileID: 502562903}
+  powerSpawner: {fileID: 502562900}
+  meteoriteSpawner: {fileID: 502562901}
+  roadObstacles: {fileID: 0}
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,6 +795,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 767974063}
   m_CullTransparentMesh: 1
+--- !u!1 &952538919
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 952538921}
+  - component: {fileID: 952538920}
+  m_Layer: 0
+  m_Name: CarSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &952538920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952538919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a97a04f78d282be40b9199081260a583, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarSpawnerPool
+  player: {fileID: 498470741}
+  carPrefabs:
+  - {fileID: 356776896206440, guid: f2028a7d8d4935343bccd922adafd42d, type: 3}
+  - {fileID: 1995899890860189636, guid: 93f3f4db2ccb77a47b1a4e482c5541b1, type: 3}
+  - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
+  - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
+  poolSize: 10
+  spawnDistanceAhead: 200
+  respawnDistance: 500
+  lanePositions:
+  - -27
+  - -21
+  - -12.37
+  - -7.17
+  - 0.96
+  - 6
+  laneY: 0.5
+  carSpeed: 250
+--- !u!4 &952538921
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952538919}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10.41641, y: 12.04, z: 12528.426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &994877166
 GameObject:
   m_ObjectHideFlags: 0
@@ -1034,7 +1112,7 @@ MonoBehaviour:
   - {fileID: 6113491147185076907, guid: c29048e16c833d64591886ab3c7567e1, type: 3}
   - {fileID: 3136019669004725227, guid: 1ebf2f8036ddac944b043262071dad32, type: 3}
   - {fileID: 3385198684153423994, guid: b944dd0b0192b0c40bd354db9daa93da, type: 3}
-  poolSize: 20
+  poolSize: 5
   minPerLane: 1
   maxPerLane: 3
   obstacleY: 0
@@ -1078,7 +1156,7 @@ Transform:
   m_GameObject: {fileID: 1427595366}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 34.67442, y: 0, z: 1277.2162}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1207,6 +1285,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SkyManager
       objectReference: {fileID: 0}
+    - target: {fileID: 5881415514178825582, guid: d6a861c0200aa5c4faaa94ad1928c373, type: 3}
+      propertyPath: ambientDarkMultiplier
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8769920001206309319, guid: d6a861c0200aa5c4faaa94ad1928c373, type: 3}
       propertyPath: m_LocalPosition.x
       value: -24.16819
@@ -1331,3 +1413,4 @@ SceneRoots:
   - {fileID: 1343949971}
   - {fileID: 229146997}
   - {fileID: 1345862131}
+  - {fileID: 952538921}
