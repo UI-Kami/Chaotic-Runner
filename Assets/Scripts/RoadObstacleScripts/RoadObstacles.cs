@@ -72,7 +72,7 @@ public class RoadObstacles : MonoBehaviour
                 obs.SetActive(true);
                 obs.transform.SetParent(map.transform, true); // parent to map
                 obs.transform.position = spawnPos;
-                obs.transform.rotation = Quaternion.identity;
+                obs.transform.rotation = Vector3.back == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(Vector3.back);
 
                 var cleanup = EnsureCleanup(obs);
                 cleanup.SetPool(this);

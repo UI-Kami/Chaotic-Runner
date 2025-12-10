@@ -503,8 +503,8 @@ MonoBehaviour:
   player: {fileID: 1206677160}
   meteoritePrefab: {fileID: 7965121537336436597, guid: 3b83e51762d0cd444b1b35f9c750d386, type: 3}
   meteoriteInterval: 20
-  meteoriteSpawnHeight: 100
-  meteoriteSpeed: 400
+  meteoriteSpawnHeight: 250
+  meteoriteSpeed: 100
   meteoriteDestroyDelay: 1
   meteoriteFallDestroyY: -10
   minMeteorsPerWave: 1
@@ -549,7 +549,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
   mapPrefab: {fileID: 8530151418778490212, guid: cafcac129354bf44ba6305a4df518f04, type: 3}
-  spawnOrigin: {fileID: 1105199558}
+  spawnOrigin: {fileID: 0}
   mapLength: 200
   overlapFix: 2.5
   autoDetectLength: 1
@@ -1292,6 +1292,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1192065984958237519, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: m_ImplicitTensor
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5142301820359950164, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalScale.x
       value: 1

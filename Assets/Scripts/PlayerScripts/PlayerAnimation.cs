@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement; // For restart or future handling
+using System.Collections;
 
 [RequireComponent(typeof(Animator))]
 public class PlayerAnimation : MonoBehaviour
@@ -25,6 +26,8 @@ public class PlayerAnimation : MonoBehaviour
 
     [Header("Death Settings")]
     public float deathGameFreezeDelay = 1.2f; // Wait before pausing the game
+    [Tooltip("Delay (real seconds) before disabling PlayerMovement so knockback is visible.")]
+    public float deathMovementDisableDelay = 0.18f;
 
     private bool isSprinting = false;
     private bool isSliding = false;
@@ -241,17 +244,24 @@ public class PlayerAnimation : MonoBehaviour
 
         animator.SetTrigger("dead");
 
-        movement.forwardSpeed = 0f;
-        movement.enabled = false;
+        // Let knockback be applied visually: disable movement after a short real-time delay.
+        if (movement != null && deathMovementDisableDelay > 0f)
+            StartCoroutine(DisableMovementAfterDelay(deathMovementDisableDelay));
 
         deathTimer = 0f;
         Debug.Log("💀 Player has died!");
-
-
-
-
-
     }
 
+    private IEnumerator DisableMovementAfterDelay(float delay)
+    {
+        // Use real-time wait so slow-motion / timeScale changes don't affect this interval.
+        yield return new WaitForSecondsRealtime(Mathf.Max(0f, delay));
 
+        if (movement != null)
+        {
+            // stop forward motion before disabling if you want immediate visual stop
+            movement.forwardSpeed = 0f;
+            movement.enabled = false;
+        }
+    }
 }

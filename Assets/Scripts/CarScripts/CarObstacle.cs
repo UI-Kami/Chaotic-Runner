@@ -50,17 +50,37 @@ public class CarObstacle : MonoBehaviour
 
         // 🚗 Normal collision (non-sprinting)
         ExplosionManager.Instance?.SpawnCarExplosion(transform.position);
-        TimeManager.Instance?.TriggerSlowMotion(1.5f);
 
-        // Knockback player
-        Rigidbody playerRb = collision.gameObject.GetComponent<Rigidbody>();
-        if (playerRb != null)
+        // Force backward-only push: use the player's backward direction
+        Vector3 pushDir = -collision.gameObject.transform.forward;
+        pushDir.y = 0f;
+        if (pushDir.sqrMagnitude < 0.0001f)
+            pushDir = (collision.gameObject.transform.position - transform.position).normalized;
+        else
+            pushDir.Normalize();
+
+        float deathPushMultiplier = 1.6f;
+
+        // Try to use PlayerMovement (CharacterController) first
+        PlayerMovement pm = collision.gameObject.GetComponent<PlayerMovement>();
+        if (pm != null)
         {
-            Vector3 pushDir = (collision.transform.position - transform.position).normalized;
-            playerRb.AddForce(pushDir * pushForce + Vector3.up * liftForce, ForceMode.Impulse);
+            pm.ApplyKnockback(pushDir, pushForce * deathPushMultiplier, liftForce);
+        }
+        else
+        {
+            // Fallback for Rigidbody-based players
+            Rigidbody playerRb = collision.gameObject.GetComponent<Rigidbody>();
+            if (playerRb != null)
+            {
+                playerRb.AddForce(pushDir * pushForce * deathPushMultiplier + Vector3.up * liftForce, ForceMode.Impulse);
+            }
         }
 
-        // 💀 Trigger death
+        // slow motion on death
+        TimeManager.Instance?.TriggerSlowMotion(1.5f);
+
+        // 💀 Trigger death (after pushing)
         playerAnim?.TriggerDeath();
 
         Destroy(gameObject, 1f);

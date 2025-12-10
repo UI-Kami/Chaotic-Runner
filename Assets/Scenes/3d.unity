@@ -344,6 +344,10 @@ PrefabInstance:
       value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: knockbackDecay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: horizontalSpeed
       value: 25
       objectReference: {fileID: 0}
@@ -414,6 +418,7 @@ GameObject:
   - component: {fileID: 502562904}
   - component: {fileID: 502562901}
   - component: {fileID: 502562900}
+  - component: {fileID: 502562905}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -483,7 +488,7 @@ MonoBehaviour:
   minMeteorsPerWave: 1
   maxMeteorsPerWave: 3
   meteoriteSpread: 10
-  meteorShakeIntensity: 1.5
+  meteorShakeIntensity: 1.2
   meteorShakeDuration: 1
 --- !u!114 &502562903
 MonoBehaviour:
@@ -498,7 +503,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
   mapPrefab: {fileID: 8530151418778490212, guid: cafcac129354bf44ba6305a4df518f04, type: 3}
-  spawnOrigin: {fileID: 1427595367}
+  spawnOrigin: {fileID: 0}
   mapLength: 200
   overlapFix: 2.5
   autoDetectLength: 1
@@ -522,7 +527,28 @@ MonoBehaviour:
   mapManager: {fileID: 502562903}
   powerSpawner: {fileID: 502562900}
   meteoriteSpawner: {fileID: 502562901}
-  roadObstacles: {fileID: 0}
+  roadObstacles: {fileID: 1345862130}
+  spawnInterval: 4
+  initialDelay: 0.5
+  enableSpawning: 1
+--- !u!114 &502562905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 502562897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0324e607b8a706840a50e2f500e13110, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeteoriteDestroyer
+  DestroyDelay: 1
+  fallDestroyY: -10
+  pushForce: 5
+  liftForce: 1
+  shakeIntensity: 1
+  shakeDuration: 1
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0
@@ -830,9 +856,9 @@ MonoBehaviour:
   - {fileID: 1995899890860189636, guid: 93f3f4db2ccb77a47b1a4e482c5541b1, type: 3}
   - {fileID: 2612553097281827454, guid: 95619a0f2e0afbc4284f441c76a6d596, type: 3}
   - {fileID: 7359139888310033480, guid: 5cab734400904e24683c7928b57f9e97, type: 3}
-  poolSize: 10
-  spawnDistanceAhead: 200
-  respawnDistance: 500
+  poolSize: 4
+  spawnDistanceAhead: 500
+  respawnDistance: 1000
   lanePositions:
   - -27
   - -21
@@ -840,8 +866,8 @@ MonoBehaviour:
   - -7.17
   - 0.96
   - 6
-  laneY: 0.5
-  carSpeed: 250
+  laneY: 1
+  carSpeed: 200
 --- !u!4 &952538921
 Transform:
   m_ObjectHideFlags: 0
@@ -981,9 +1007,13 @@ MonoBehaviour:
   meteorExplosionClip: {fileID: 8300000, guid: ea441bc617799704fabd6126447bd03f, type: 3}
   plasmaExplosionClip: {fileID: 8300000, guid: 7b0380372c9775d46bd3e6ed11778254, type: 3}
   minPitch: 0.9
-  maxPitch: 1.1
-  volume: 1
-  maxDistance: 10000
+  maxPitch: 1
+  volume: 0.5
+  maxDistance: 1000
+  defaultSpatialBlend: 0.6
+  defaultRolloff: 1
+  defaultMinDistance: 2
+  defaultDoppler: 0
 --- !u!4 &1208699236
 Transform:
   m_ObjectHideFlags: 0
@@ -1112,9 +1142,9 @@ MonoBehaviour:
   - {fileID: 6113491147185076907, guid: c29048e16c833d64591886ab3c7567e1, type: 3}
   - {fileID: 3136019669004725227, guid: 1ebf2f8036ddac944b043262071dad32, type: 3}
   - {fileID: 3385198684153423994, guid: b944dd0b0192b0c40bd354db9daa93da, type: 3}
-  poolSize: 5
+  poolSize: 4
   minPerLane: 1
-  maxPerLane: 3
+  maxPerLane: 1
   obstacleY: 0
 --- !u!4 &1345862131
 Transform:
