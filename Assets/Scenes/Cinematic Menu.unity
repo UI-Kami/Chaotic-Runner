@@ -487,6 +487,9 @@ MonoBehaviour:
   powerSpawner: {fileID: 515051212}
   meteoriteSpawner: {fileID: 515051211}
   roadObstacles: {fileID: 0}
+  spawnInterval: 2
+  initialDelay: 0.5
+  enableSpawning: 1
 --- !u!114 &515051211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -525,6 +528,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PowerSpawner
   powerPrefab: {fileID: 7904724486694206302, guid: a1dc4e0947b2b914ab4826abec68472b, type: 3}
+  swordPrefab: {fileID: 0}
+  swordSpawnChance: 0.15
   powerParent: {fileID: 1105199558}
   powerY: 1.5
   lanePositions:
@@ -1159,7 +1164,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1836655478}
+      - m_Target: {fileID: 1836655480}
         m_TargetAssemblyTypeName: CinematicMenuUI, Assembly-CSharp
         m_MethodName: OnRestartPressed
         m_Mode: 1
@@ -1292,6 +1297,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 648841260652291388, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: sprintBoostDuration
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 648841260652291388, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: fenceJumpTriggers.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1192065984958237519, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_ImplicitTensor
       value: 1
@@ -1620,7 +1633,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1836655478}
+      - m_Target: {fileID: 1836655480}
         m_TargetAssemblyTypeName: CinematicMenuUI, Assembly-CSharp
         m_MethodName: OnStartPressed
         m_Mode: 1
@@ -1753,7 +1766,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1836655478}
+      - m_Target: {fileID: 1836655480}
         m_TargetAssemblyTypeName: CinematicMenuUI, Assembly-CSharp
         m_MethodName: OnExitPressed
         m_Mode: 1
@@ -1901,6 +1914,7 @@ MonoBehaviour:
   sprintSpeed: 40
   jumpHeight: 2.5
   gravity: -25
+  knockbackDecay: 8
 --- !u!143 &1683998444
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1950,7 +1964,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1836655479}
-  - component: {fileID: 1836655478}
+  - component: {fileID: 1836655480}
+  - component: {fileID: 1836655481}
   m_Layer: 0
   m_Name: CinemeticMainMenu
   m_TagString: Untagged
@@ -1958,20 +1973,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1836655478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1836655477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7ba9fa48af362343871616b40563c88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CinematicMenuUI
-  mainGameSceneName: 3d
-  menuPanel: {fileID: 2107652363}
 --- !u!4 &1836655479
 Transform:
   m_ObjectHideFlags: 0
@@ -1987,6 +1988,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1836655480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836655477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1bbe0370801a504bb48279607e27d8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CinematicMenuUI
+  mainGameSceneName: 3d
+  menuPanel: {fileID: 2107652363}
+--- !u!114 &1836655481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836655477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7ba9fa48af362343871616b40563c88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIGameManager
+  deathMenu: {fileID: 0}
+  mainMenuSceneName: 
 --- !u!1001 &1914915621
 PrefabInstance:
   m_ObjectHideFlags: 0

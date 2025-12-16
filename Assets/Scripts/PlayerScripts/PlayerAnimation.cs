@@ -17,9 +17,9 @@ public class PlayerAnimation : MonoBehaviour
     public float slideDuration = 0.8f;
     public float postSlideJumpDelay = 0.3f;
 
-    [Header("Roll Settings")]
-    public float rollCooldown = 1.2f;
-    public float rollDuration = 0.6f;
+    // [Header("Roll Settings")]
+    // public float rollCooldown = 1.2f;
+    // public float rollDuration = 0.6f;
 
     [Header("Lateral Settings")]
     public float lateralThreshold = 0.1f;
@@ -28,6 +28,11 @@ public class PlayerAnimation : MonoBehaviour
     public float deathGameFreezeDelay = 1.2f; // Wait before pausing the game
     [Tooltip("Delay (real seconds) before disabling PlayerMovement so knockback is visible.")]
     public float deathMovementDisableDelay = 0.18f;
+    [Header("Post-Death")]
+    [Tooltip("If true, load the main menu scene after the death delay.")]
+    public bool loadMainMenuOnDeath = true;
+    [Tooltip("Name of the main menu scene to load on death. Ensure it's included in Build Settings.")]
+    public string mainMenuSceneName = "MainMenu";
 
     private bool isSprinting = false;
     private bool isSliding = false;
@@ -41,6 +46,12 @@ public class PlayerAnimation : MonoBehaviour
     private float rollCooldownTimer = 0f;
     private float jumpLockTimer = 0f;
     private float deathTimer = 0f;
+    // Nearby fence reference (set by obstacle when player is in detection rays)
+    private ObstacleBehaviorScript nearbyFence = null;
+
+    [Header("Fence Jump Settings")]
+    [Tooltip("List of animator trigger names to pick from when performing a fence jump. If empty, uses 'fenceJump'.")]
+    public string[] fenceJumpTriggers = new string[0];
 
     public bool IsSprinting() => isSprinting;
 
@@ -65,7 +76,7 @@ public class PlayerAnimation : MonoBehaviour
 
         HandleSprinting();
         HandleSlideInput();
-        HandleRollInput();
+        // HandleRollInput();
         UpdateAnimation();
 
         if (jumpLockTimer > 0f)
@@ -109,32 +120,32 @@ public class PlayerAnimation : MonoBehaviour
     }
 
     // --------------------------------------------------------------------
-    void HandleRollInput()
-    {
-        rollCooldownTimer -= Time.deltaTime;
+    // void HandleRollInput()
+    // {
+    //     rollCooldownTimer -= Time.deltaTime;
 
-        if (isRolling)
-        {
-            rollTimer -= Time.deltaTime;
-            if (rollTimer <= 0f)
-                isRolling = false;
-            return;
-        }
+    //     if (isRolling)
+    //     {
+    //         rollTimer -= Time.deltaTime;
+    //         if (rollTimer <= 0f)
+    //             isRolling = false;
+    //         return;
+    //     }
 
-        if (rollCooldownTimer <= 0f && movement.GetComponent<CharacterController>().isGrounded)
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-                StartRoll();
-        }
-    }
+    //     if (rollCooldownTimer <= 0f && movement.GetComponent<CharacterController>().isGrounded)
+    //     {
+    //         if (Input.GetKeyDown(KeyCode.R))
+    //             StartRoll();
+    //     }
+    // }
 
-    void StartRoll()
-    {
-        isRolling = true;
-        rollTimer = rollDuration;
-        rollCooldownTimer = rollCooldown;
-        animator.SetTrigger("roll");
-    }
+    // void StartRoll()
+    // {
+    //     isRolling = true;
+    //     rollTimer = rollDuration;
+    //     rollCooldownTimer = rollCooldown;
+    //     animator.SetTrigger("roll");
+    // }
 
     // --------------------------------------------------------------------
     void UpdateAnimation()
@@ -150,8 +161,19 @@ public class PlayerAnimation : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space) && !isSliding && !isRolling && jumpLockTimer <= 0f)
             {
-                animator.SetTrigger("jump");
-                animator.SetBool("isJumping", true);
+                // If a nearby fence is registered, perform a fence jump instead of the normal jump
+                if (nearbyFence != null && !IsMovementLocked())
+                {
+                    // Invoke fence's PerformFenceJump which also triggers the animation via TriggerFenceJumpRandom
+                    nearbyFence.PerformFenceJump(gameObject);
+                    // Clear the nearby fence so we don't accidentally re-trigger
+                    nearbyFence = null;
+                }
+                else
+                {
+                    animator.SetTrigger("jump");
+                    animator.SetBool("isJumping", true);
+                }
             }
         }
         else
@@ -224,6 +246,65 @@ public class PlayerAnimation : MonoBehaviour
         }
     }
 
+    public void TriggerFenceJump()
+    {
+        if (isDead) return;
+
+        // Prevent fence-jump while locked (sliding/rolling/etc)
+        if (IsMovementLocked()) return;
+
+        // You must add a "fenceJump" Trigger parameter in the Animator Controller
+        // and create the animation transition you want there.
+        if (animator != null)
+        {
+            TriggerFenceJumpRandom();
+            Debug.Log("TriggerFenceJump called — firing randomized fence-jump trigger");
+        }
+    }
+
+    public void TriggerSwordSlash()
+    {
+        if (isDead) return;
+        if (IsMovementLocked()) return;
+        if (animator == null) return;
+
+        animator.SetTrigger("swordSlash");
+        Debug.Log("TriggerSwordSlash fired");
+    }
+
+    // Choose a random fence-jump trigger name from `fenceJumpTriggers` and fire it.
+    // Falls back to the classic 'fenceJump' trigger when none configured.
+    public void TriggerFenceJumpRandom()
+    {
+        if (isDead) return;
+        if (IsMovementLocked()) return;
+
+        if (animator == null) return;
+
+        string triggerName = "fenceJump";
+        if (fenceJumpTriggers != null && fenceJumpTriggers.Length > 0)
+        {
+            int idx = UnityEngine.Random.Range(0, fenceJumpTriggers.Length);
+            triggerName = fenceJumpTriggers[idx];
+        }
+
+        animator.SetTrigger(triggerName);
+        Debug.Log($"TriggerFenceJumpRandom fired trigger '{triggerName}'");
+    }
+
+    // Called by obstacles when the player enters/maintains detection. Only stores the reference.
+    public void RegisterNearbyFence(ObstacleBehaviorScript fence)
+    {
+        nearbyFence = fence;
+    }
+
+    // Called by obstacles when the player leaves detection for this fence. Only clears if matching.
+    public void ClearNearbyFence(ObstacleBehaviorScript fence)
+    {
+        if (nearbyFence == fence)
+            nearbyFence = null;
+    }
+
     // --------------------------------------------------------------------
     public bool IsSliding() => isSliding;
     public bool IsRolling() => isRolling;
@@ -250,6 +331,10 @@ public class PlayerAnimation : MonoBehaviour
 
         deathTimer = 0f;
         Debug.Log("💀 Player has died!");
+
+        // Optionally load main menu after the death freeze delay
+        if (loadMainMenuOnDeath)
+            StartCoroutine(LoadMainMenuAfterDelay(deathGameFreezeDelay + 0.2f));
     }
 
     private IEnumerator DisableMovementAfterDelay(float delay)
@@ -262,6 +347,30 @@ public class PlayerAnimation : MonoBehaviour
             // stop forward motion before disabling if you want immediate visual stop
             movement.forwardSpeed = 0f;
             movement.enabled = false;
+        }
+    }
+
+    private bool deathSceneLoading = false;
+    private IEnumerator LoadMainMenuAfterDelay(float delay)
+    {
+        if (deathSceneLoading) yield break;
+        deathSceneLoading = true;
+
+        // wait in real time so timeScale doesn't affect it
+        yield return new WaitForSecondsRealtime(Mathf.Max(0f, delay));
+
+        // ensure timeScale is normal before loading
+        Time.timeScale = 1f;
+
+        // Load main menu scene after death delay (no in-game death menu integration)
+        if (!string.IsNullOrEmpty(mainMenuSceneName))
+        {
+            Debug.Log($"Loading main menu scene '{mainMenuSceneName}' after death.");
+            SceneManager.LoadScene(mainMenuSceneName);
+        }
+        else
+        {
+            Debug.LogWarning("Main menu scene name is empty: cannot load main menu on death.");
         }
     }
 }

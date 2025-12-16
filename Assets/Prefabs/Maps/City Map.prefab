@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapEndTrigger
   spawner: {fileID: 0}
-  destroyDelay: 0.5
+  destroyDelay: 2
   playerTag: Player
 --- !u!1 &4861140700755340681
 GameObject:

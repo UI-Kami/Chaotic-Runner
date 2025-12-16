@@ -9,6 +9,8 @@ public class MeteoriteDestroyer : MonoBehaviour
         public float liftForce = 20f;
         public float shakeIntensity = 0.6f;
         public float shakeDuration = 0.45f;
+        [Tooltip("Radius in meters to affect nearby obstacles and cars when this meteor impacts.")]
+        public float areaBlastRadius = 8f;
 
         private bool hasImpacted = false;
 
@@ -27,6 +29,41 @@ public class MeteoriteDestroyer : MonoBehaviour
             ExplosionManager.Instance?.SpawnMeteorExplosion(impactPos);
             if (CameraShake.Instance != null)
                 CameraShake.Instance.ShakeCamera(shakeIntensity, shakeDuration);
+            // Destroy nearby obstacles and cars within blast radius
+            if (areaBlastRadius > 0f)
+            {
+                Collider[] hits = Physics.OverlapSphere(impactPos, areaBlastRadius);
+                var roadObsManager = FindObjectOfType<RoadObstacles>();
+
+                foreach (var c in hits)
+                {
+                    if (c == null || c.gameObject == null) continue;
+
+                    // Destroy/return obstacles found
+                    var cleanup = c.GetComponentInParent<RoadObstacles.ObstacleCleanup>();
+                    if (cleanup != null)
+                    {
+                        // Play meteor explosion sound at obstacle (no additional VFX)
+                        ExplosionSoundManager.Instance?.PlayMeteorExplosion(cleanup.transform.position);
+                        // Return obstacle to pool via manager (if available)
+                        if (roadObsManager != null)
+                            roadObsManager.ReturnObstacleToPool(cleanup.gameObject);
+                        else
+                            Destroy(cleanup.gameObject);
+                        continue;
+                    }
+
+                    // Destroy cars found in area
+                    if (c.CompareTag("Car") || c.CompareTag("DrunkCar") || c.GetComponentInParent<DrunkDriverAI>() != null || c.GetComponentInParent<CarObstacle>() != null)
+                    {
+                        // Play meteor explosion sound for cars (no additional VFX)
+                        ExplosionSoundManager.Instance?.PlayMeteorExplosion(c.transform.position);
+                        Destroy(c.gameObject);
+                        continue;
+                    }
+                }
+            }
+
             Destroy(gameObject, DestroyDelay);
             
         }

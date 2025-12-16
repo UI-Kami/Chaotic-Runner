@@ -149,19 +149,123 @@ public class RoadObstacles : MonoBehaviour
 
         public void SetPool(RoadObstacles p) { pool = p; }
 
+        // Called externally when the obstacle is slashed by the sword power.
+        public void HandleSlashed()
+        {
+            // Notify behavior script (if present) to ignore detection briefly
+            var obsBehavior = GetComponent<ObstacleBehaviorScript>();
+            obsBehavior?.OnSlashed(0.25f);
+
+            pool?.ReturnObstacleToPool(gameObject);
+        }
+
         void OnCollisionEnter(Collision other)
         {
+            // Player hit
             if (other.collider.CompareTag("Player"))
             {
+                var playerObj = other.gameObject;
+                var pa = playerObj.GetComponent<PlayerAnimation>();
+                var pm = playerObj.GetComponent<PlayerMovement>();
+
+                if (pa != null && pa.IsSprinting())
+                {
+                    // Player powered/sprinting: spawn plasma, destroy obstacle
+                    ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
+                    TimeManager.Instance?.TriggerSlowMotion(2.5f);
+                    pool?.ReturnObstacleToPool(gameObject);
+                    return;
+                }
+
+                // Normal player hit: simple death animation (no explosion)
+                if (pa != null)
+                {
+                    // push player backward-only for visual feedback
+                    if (pm != null)
+                    {
+                        Vector3 pushDir = -playerObj.transform.forward;
+                        pushDir.y = 0f;
+                        if (pushDir.sqrMagnitude < 0.0001f)
+                            pushDir = (playerObj.transform.position - transform.position).normalized;
+                        else
+                            pushDir.Normalize();
+
+                        pm.ApplyKnockback(pushDir, 8f, 6f);
+                    }
+
+                    pa.TriggerDeath();
+                }
+
                 pool?.ReturnObstacleToPool(gameObject);
+                return;
             }
+
+            // Car collision path (non-trigger collisions): same policy as trigger path
+            /*
+            if (other.collider.CompareTag("Car") || other.collider.CompareTag("DrunkCar") || other.gameObject.GetComponent<CarObstacle>() != null)
+            {
+                // Only remove the obstacle; do NOT destroy the car or play any VFX
+                pool?.ReturnObstacleToPool(gameObject);
+                return;
+            }
+            */
         }
 
         void OnTriggerEnter(Collider other)
         {
+            // Player hit (trigger collider path)
             if (other.CompareTag("Player"))
             {
+                var playerObj = other.gameObject;
+                var pa = playerObj.GetComponent<PlayerAnimation>();
+                var pm = playerObj.GetComponent<PlayerMovement>();
+
+                if (pa != null && pa.IsSprinting())
+                {
+                    ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
+                    TimeManager.Instance?.TriggerSlowMotion(2.5f);
+                    pool?.ReturnObstacleToPool(gameObject);
+                    return;
+                }
+
+                if (pa != null)
+                {
+                    if (pm != null)
+                    {
+                        Vector3 pushDir = -playerObj.transform.forward;
+                        pushDir.y = 0f;
+                        if (pushDir.sqrMagnitude < 0.0001f)
+                            pushDir = (playerObj.transform.position - transform.position).normalized;
+                        else
+                            pushDir.Normalize();
+
+                        pm.ApplyKnockback(pushDir, 8f, 6f);
+                    }
+
+                    pa.TriggerDeath();
+                }
+
                 pool?.ReturnObstacleToPool(gameObject);
+                return;
+            }
+
+            // Car or other vehicle hits the obstacle → destroy obstacle (and optionally the car)
+            /*
+            if (other.CompareTag("Car") || other.CompareTag("DrunkCar") || other.GetComponent<CarObstacle>() != null)
+            {
+                // When a car collides with an obstacle, only destroy the obstacle.
+                // Do NOT destroy the car or spawn any explosion/VFX/sound.
+                pool?.ReturnObstacleToPool(gameObject);
+                return;
+            }
+            */
+
+            // Meteor collision (direct): destroy obstacle and optionally spawn meteor explosion
+            if (other.GetComponent<MeteoriteDestroyer>() != null)
+            {
+                ExplosionManager.Instance?.SpawnMeteorExplosion(transform.position);
+                pool?.ReturnObstacleToPool(gameObject);
+                return;
             }
         }
     }

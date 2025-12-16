@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 8780797528093013536}
   - component: {fileID: 8842450035120495317}
   - component: {fileID: 8335356114150527181}
+  - component: {fileID: 4837025931528418743}
   m_Layer: 0
   m_Name: Barrier
-  m_TagString: Untagged
+  m_TagString: Fence
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4514240677770663834}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.01, y: 0, z: -101.77}
-  m_LocalScale: {x: 1.273797, y: 0.49940503, z: 1.1574765}
+  m_LocalScale: {x: 1.273797, y: 0.7, z: 1.1574765}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4514240677769399194
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -155,3 +156,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.22039695, y: 1.591783, z: 0.2}
   m_Center: {x: 1.3052074, y: 0.7952152, z: -0.00000026391362}
+--- !u!114 &4837025931528418743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4514240677770663834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91aaeb88816b93d42bf7b2c220f556bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleBehaviorScript
+  rayStartHeight: 1.2
+  detectionDistance: 8
+  inFrontDotThreshold: 0.25
+  fenceJumpUpImpulse: 8
+  fenceJumpHorizontalImpulse: 3
+  rayCount: 8
+  raySpreadAngle: 0
+  rayWidth: 2
+  fenceJumpCooldown: 0.9
+  autoTriggerFenceJump: 0

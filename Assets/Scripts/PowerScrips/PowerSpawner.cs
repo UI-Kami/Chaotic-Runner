@@ -5,6 +5,9 @@ public class PowerSpawner : MonoBehaviour
 {
     [Header("Power Settings")]
     public GameObject powerPrefab;
+    [Tooltip("Optional: a dedicated sword power prefab. If set, sword prefabs may spawn on maps according to swordSpawnChance.")]
+    public GameObject swordPrefab;
+    [Range(0f,1f)] public float swordSpawnChance = 0.15f;
     public Transform powerParent;
     public float powerY = 1.5f;
     public float[] lanePositions = { -27f, -21f, -12.37f, -7.17f, 0.96f, 6f };
@@ -38,7 +41,16 @@ public class PowerSpawner : MonoBehaviour
             float spawnZ = Random.Range(mapStartZ + 5f, mapEndZ - 5f);
             Vector3 spawnPos = new Vector3(laneX, powerY, spawnZ);
 
-            GameObject power = powerPool.Count > 0 ? powerPool.Dequeue() : Instantiate(powerPrefab);
+            // Decide whether this spawn is a sword power or the regular power
+            GameObject power = null;
+            if (swordPrefab != null && Random.value < swordSpawnChance)
+            {
+                power = Instantiate(swordPrefab);
+            }
+            else
+            {
+                power = powerPool.Count > 0 ? powerPool.Dequeue() : Instantiate(powerPrefab);
+            }
             if (power == null) continue;
 
             power.SetActive(true);
@@ -60,7 +72,7 @@ public class PowerSpawner : MonoBehaviour
         Rigidbody rb = power.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
 
