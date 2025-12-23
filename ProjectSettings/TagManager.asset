@@ -17,6 +17,7 @@ TagManager:
   - Billboard
   - LargeBillboard
   - WoodenFence
+  - Sword
   layers:
   - Default
   - TransparentFX

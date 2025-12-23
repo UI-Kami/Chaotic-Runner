@@ -1309,6 +1309,10 @@ PrefabInstance:
       propertyPath: m_ImplicitTensor
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2196971845337771714, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: ringOffset.y
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 5142301820359950164, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -2014,8 +2018,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7ba9fa48af362343871616b40563c88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIGameManager
-  deathMenu: {fileID: 0}
-  mainMenuSceneName: 
 --- !u!1001 &1914915621
 PrefabInstance:
   m_ObjectHideFlags: 0

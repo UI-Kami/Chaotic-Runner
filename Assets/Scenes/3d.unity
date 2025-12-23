@@ -410,43 +410,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5539959447499634492, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 498470744}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
 --- !u!4 &498470741 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
   m_PrefabInstance: {fileID: 498470740}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &498470742 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4280809921639594669, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  m_PrefabInstance: {fileID: 498470740}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &498470743 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5539959447499634492, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
-  m_PrefabInstance: {fileID: 498470740}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &498470744
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 498470743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8522a0b9444179f47848dd13acb8b596, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSword
-  handTransform: {fileID: 498470742}
-  handWeapon: {fileID: 8449004803641222730, guid: 3045c61ef49a37e4db0be98977e04f47, type: 3}
-  slashCooldown: 0.25
-  defaultSwordDuration: 8
-  slashColliderEnableTime: 0.06
 --- !u!1 &502562897
 GameObject:
   m_ObjectHideFlags: 0
@@ -461,7 +431,6 @@ GameObject:
   - component: {fileID: 502562901}
   - component: {fileID: 502562900}
   - component: {fileID: 502562905}
-  - component: {fileID: 502562906}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -498,7 +467,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PowerSpawner
   powerPrefab: {fileID: 7904724486694206302, guid: a1dc4e0947b2b914ab4826abec68472b, type: 3}
   swordPrefab: {fileID: 8449004803641222730, guid: 3045c61ef49a37e4db0be98977e04f47, type: 3}
-  swordSpawnChance: 1
+  swordSpawnChance: 0.5
   powerParent: {fileID: 1427595367}
   powerY: 1.5
   lanePositions:
@@ -595,30 +564,6 @@ MonoBehaviour:
   shakeIntensity: 1
   shakeDuration: 1
   areaBlastRadius: 20
---- !u!114 &502562906
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 502562897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 260b955d36f1ff849a498d81748e6eee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SwordPower
-  slashDistance: 4
-  rayCount: 5
-  raySpreadAngle: 30
-  rayHeight: 1.2
-  rayWidth: 0.5
-  hitMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  slashClip: {fileID: 0}
-  slashVolume: 1
-  swordModelPrefab: {fileID: 8449004803641222730, guid: 3045c61ef49a37e4db0be98977e04f47, type: 3}
-  swordDuration: 8
 --- !u!1 &753032868
 GameObject:
   m_ObjectHideFlags: 0

@@ -37,15 +37,46 @@ public class PowerSpawner : MonoBehaviour
         int count = Random.Range(2, 4);
         for (int i = 0; i < count; i++)
         {
-            float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-            float spawnZ = Random.Range(mapStartZ + 5f, mapEndZ - 5f);
-            Vector3 spawnPos = new Vector3(laneX, powerY, spawnZ);
+            // pick a spawn position and attempt to avoid overlapping other powers on this map
+            Vector3 spawnPos;
+            const int maxAttempts = 8;
+            int attempts = 0;
+            float minSpacing = 2.2f; // minimum distance between powers
+            bool found = false;
+            do
+            {
+                float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
+                float spawnZ = Random.Range(mapStartZ + 5f, mapEndZ - 5f);
+                spawnPos = new Vector3(laneX, powerY, spawnZ);
+
+                // Check existing powers already parented to the map to avoid overlap
+                found = true; // assume OK
+                var existing = map.GetComponentsInChildren<PowerCleanup>(true);
+                foreach (var e in existing)
+                {
+                    if (e == null || e.gameObject == null) continue;
+                    if (Vector3.Distance(e.gameObject.transform.position, spawnPos) < minSpacing)
+                    {
+                        found = false; // too close, try again
+                        break;
+                    }
+                }
+                attempts++;
+            } while (!found && attempts < maxAttempts);
+
+            if (!found)
+            {
+                // couldn't find a clean spot after some attempts; adjust Z slightly to reduce stacking
+                spawnPos.z += attempts * 1.5f;
+            }
 
             // Decide whether this spawn is a sword power or the regular power
+            bool isSword = false;
             GameObject power = null;
             if (swordPrefab != null && Random.value < swordSpawnChance)
             {
                 power = Instantiate(swordPrefab);
+                isSword = true;
             }
             else
             {
@@ -57,6 +88,8 @@ public class PowerSpawner : MonoBehaviour
             power.transform.SetParent(map.transform, true);
             power.transform.position = spawnPos;
             power.transform.rotation = Quaternion.identity;
+
+            Debug.Log($"PowerSpawner: Spawned {(isSword ? "Sword" : "Power")} '{power.name}' at {spawnPos} (map={map.name})");
 
             PowerCleanup cleaner = power.GetComponent<PowerCleanup>();
             if (cleaner == null) cleaner = power.AddComponent<PowerCleanup>();
@@ -132,9 +165,20 @@ public class PowerSpawner : MonoBehaviour
         {
             if (other.CompareTag("Player"))
             {
-                // Play pickup logic is supposed to be in the SprintPower script; ensure SprintPower calls HandlePickup.
-                poolManager?.ReturnPowerToPool(gameObject);
+                // If this object has already been deactivated by the pickup logic, don't try to start a coroutine on it.
+                if (!gameObject.activeInHierarchy) return;
+                // Delay returning to pool by one frame so any pickup scripts (e.g., SprintPower, SwordPower)
+                // that run OnTriggerEnter on the same GameObject have a chance to execute first.
+                StartCoroutine(DelayedReturnOneFrame());
             }
+        }
+
+        private System.Collections.IEnumerator DelayedReturnOneFrame()
+        {
+            yield return null; // wait one frame
+            // If the object has already been returned/handled by the pickup script it will likely be inactive; skip returning in that case.
+            if (!gameObject.activeInHierarchy) yield break;
+            poolManager?.ReturnPowerToPool(gameObject);
         }
     }
 }

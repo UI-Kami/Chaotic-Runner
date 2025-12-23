@@ -155,6 +155,9 @@ public class RoadObstacles : MonoBehaviour
             // Notify behavior script (if present) to ignore detection briefly
             var obsBehavior = GetComponent<ObstacleBehaviorScript>();
             obsBehavior?.OnSlashed(0.25f);
+            // Play plasma explosion & slow-motion like sprint mode when slashed
+            ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
+            TimeManager.Instance?.TriggerSlowMotion(2.5f);
 
             pool?.ReturnObstacleToPool(gameObject);
         }

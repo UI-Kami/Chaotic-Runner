@@ -13,11 +13,10 @@ GameObject:
   - component: {fileID: 7944377688359503775}
   - component: {fileID: 6738027336747218544}
   - component: {fileID: 5472265748636013770}
-  - component: {fileID: 6616755399507650419}
-  - component: {fileID: 6232597254792088106}
+  - component: {fileID: 4744595221306085947}
   m_Layer: 0
   m_Name: Sword1_Gold
-  m_TagString: Untagged
+  m_TagString: Sword
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -110,7 +109,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.3347522, y: 2.750122, z: 0.19929491}
   m_Center: {x: -0.00274878, y: 0.70455194, z: 0.0047172233}
@@ -211,24 +210,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &6616755399507650419
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8449004803641222730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0db3d2cc6541589498660d285e1ec429, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SwordHitBox
-  hittableTags:
-  - Fence
-  - Billboard
-  - LargeBillboard
-  - WoodenFence
---- !u!114 &6232597254792088106
+--- !u!114 &4744595221306085947
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -240,15 +222,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 260b955d36f1ff849a498d81748e6eee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordPower
-  slashDistance: 6
-  rayCount: 6
-  raySpreadAngle: 49.4
-  rayHeight: 1.5
+  slashDistance: 5
+  rayCount: 5
+  raySpreadAngle: 30
+  rayHeight: 1.2
   rayWidth: 0.5
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967295
   slashClip: {fileID: 0}
   slashVolume: 1
-  swordModelPrefab: {fileID: 0}
+  swordModelPrefab: {fileID: 8449004803641222730}
+  swordRingPrefab: {fileID: 1883935780596769616, guid: 4ecc99328b12ae1458704d25241bd284, type: 3}
   swordDuration: 10
