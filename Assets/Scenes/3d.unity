@@ -292,6 +292,14 @@ PrefabInstance:
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 648841260652291388, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: mainMenuSceneName
+      value: Cinematic Menu
+      objectReference: {fileID: 0}
+    - target: {fileID: 648841260652291388, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: loadMainMenuOnDeath
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 648841260652291388, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: deathGameFreezeDelay
       value: 1.5
       objectReference: {fileID: 0}
@@ -466,7 +474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PowerSpawner
   powerPrefab: {fileID: 7904724486694206302, guid: a1dc4e0947b2b914ab4826abec68472b, type: 3}
-  swordPrefab: {fileID: 8449004803641222730, guid: 3045c61ef49a37e4db0be98977e04f47, type: 3}
+  swordPrefab: {fileID: 7069016865626911631, guid: f0bd2448fd1771a459f2189617422b45, type: 3}
   swordSpawnChance: 0.5
   powerParent: {fileID: 1427595367}
   powerY: 1.5

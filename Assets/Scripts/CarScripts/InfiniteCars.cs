@@ -77,6 +77,13 @@ public class CarSpawnerPool : MonoBehaviour
         if (!initialized || player == null)
             return;
 
+        // If an initial no-spawn window is active, skip spawning and keep nextSpawnZ ahead
+        if (GameMode.IsInitialSpawnSuppressed)
+        {
+            nextSpawnZ = player.position.z + spawnDistanceAhead;
+            return;
+        }
+
         MoveAndRecycleCars();
 
         // Continuously spawn cars ahead

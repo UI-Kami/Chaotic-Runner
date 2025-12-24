@@ -103,7 +103,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   slashClip: {fileID: 0}
   slashVolume: 1
-  swordModelPrefab: {fileID: 8449004803641222730, guid: 3045c61ef49a37e4db0be98977e04f47, type: 3}
+  swordModelPrefab: {fileID: 7069016865626911631, guid: f0bd2448fd1771a459f2189617422b45, type: 3}
   swordRingPrefab: {fileID: 1883935780596769616}
   swordDuration: 8
 --- !u!54 &8570406920156238493

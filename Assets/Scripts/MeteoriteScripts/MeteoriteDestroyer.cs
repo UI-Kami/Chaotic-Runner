@@ -14,10 +14,22 @@ public class MeteoriteDestroyer : MonoBehaviour
 
         private bool hasImpacted = false;
 
+        // reference to the SkyDarkener instance (set when spawned)
+        public SkyDarkener_Builtin skyDarkener;
+
         void Update()
         {
             if (transform.position.y < fallDestroyY)
                 Destroy(gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            // Ensure the sky darkener unregisters this meteor so the sky can restore when no meteors remain
+            if (skyDarkener != null)
+                skyDarkener.UnregisterMeteor();
+            else
+                FindObjectOfType<SkyDarkener_Builtin>()?.UnregisterMeteor();
         }
 
         private void HandleImpact()

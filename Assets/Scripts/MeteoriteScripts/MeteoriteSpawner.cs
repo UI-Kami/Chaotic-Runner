@@ -39,6 +39,9 @@ public class MeteoriteSpawner : MonoBehaviour
             yield return new WaitForSeconds(meteoriteInterval + Random.Range(-1f, 2f));
             if (player == null || meteoritePrefab == null || mapManager == null) continue;
 
+            // Skip launching meteor waves while initial spawn suppression is active
+            if (GameMode.IsInitialSpawnSuppressed) continue;
+
             skyDarkener?.DarkenSky();
             LaunchMeteoriteWave();
         }
@@ -65,8 +68,6 @@ public class MeteoriteSpawner : MonoBehaviour
             GameObject meteor = Instantiate(meteoritePrefab, spawnPos, Quaternion.identity);
             Rigidbody rb = meteor.GetComponent<Rigidbody>();
 
-            if (skyDarkener != null) skyDarkener.RegisterMeteor();
-
             if (rb != null)
             {
                 Vector3 target = player.position + new Vector3(Random.Range(-5f, 5f), -15f, Random.Range(10f, 25f));
@@ -81,6 +82,10 @@ public class MeteoriteSpawner : MonoBehaviour
             destroyer.fallDestroyY = meteoriteFallDestroyY;
             destroyer.shakeIntensity = meteorShakeIntensity;
             destroyer.shakeDuration = meteorShakeDuration;
+
+            // hook up the sky darkener reference and register this meteor so the sky knows an active meteor exists
+            destroyer.skyDarkener = skyDarkener;
+            skyDarkener?.RegisterMeteor();
         }
 
         Debug.Log($"☄️ Meteorite wave launched ({meteorCount} meteors)");

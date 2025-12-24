@@ -167,6 +167,55 @@ MonoBehaviour:
   scoreRate: 10
   scoreText: {fileID: 0}
   highScoreText: {fileID: 0}
+--- !u!1 &75456018
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 75456020}
+  - component: {fileID: 75456019}
+  m_Layer: 0
+  m_Name: SmooothTransition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &75456019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75456018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b40dd356be81aac4ebfdcca657ec6148, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneTransition
+  fadeDuration: 1.5
+  fadeColor: {r: 0, g: 0, b: 0, a: 1}
+  canvas: {fileID: 0}
+  overlayImage: {fileID: 0}
+  dontDestroyOnLoad: 1
+--- !u!4 &75456020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75456018}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -83.16258, y: 41.73697, z: 1296.0198}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &236781745
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,8 +555,8 @@ MonoBehaviour:
   player: {fileID: 1206677160}
   meteoritePrefab: {fileID: 7965121537336436597, guid: 3b83e51762d0cd444b1b35f9c750d386, type: 3}
   meteoriteInterval: 20
-  meteoriteSpawnHeight: 250
-  meteoriteSpeed: 100
+  meteoriteSpawnHeight: 100
+  meteoriteSpeed: 600
   meteoriteDestroyDelay: 1
   meteoriteFallDestroyY: -10
   minMeteorsPerWave: 1
@@ -1355,7 +1404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9
+      value: -9.56
       objectReference: {fileID: 0}
     - target: {fileID: 7147172120221098370, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1887,7 +1936,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1683998442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1969,7 +2018,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1836655479}
   - component: {fileID: 1836655480}
-  - component: {fileID: 1836655481}
   m_Layer: 0
   m_Name: CinemeticMainMenu
   m_TagString: Untagged
@@ -2006,18 +2054,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CinematicMenuUI
   mainGameSceneName: 3d
   menuPanel: {fileID: 2107652363}
---- !u!114 &1836655481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1836655477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7ba9fa48af362343871616b40563c88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIGameManager
+  useRandomStartDelay: 1
+  minStartDelay: 5
+  maxStartDelay: 10
+  fixedStartDelay: 5
 --- !u!1001 &1914915621
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2556,3 +2596,4 @@ SceneRoots:
   - {fileID: 309114694}
   - {fileID: 461045016}
   - {fileID: 1105199558}
+  - {fileID: 75456020}

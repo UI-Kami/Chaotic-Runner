@@ -366,7 +366,10 @@ public class PlayerAnimation : MonoBehaviour
         if (!string.IsNullOrEmpty(mainMenuSceneName))
         {
             Debug.Log($"Loading main menu scene '{mainMenuSceneName}' after death.");
-            SceneManager.LoadScene(mainMenuSceneName);
+            if (SceneTransition.Instance != null)
+                SceneTransition.Instance.LoadSceneWithFade(mainMenuSceneName);
+            else
+                SceneManager.LoadScene(mainMenuSceneName);
         }
         else
         {

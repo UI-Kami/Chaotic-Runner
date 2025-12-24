@@ -74,7 +74,9 @@ public class MapManager : MonoBehaviour
             endTrigger.destroyDelay = defaultDestroyDelay;
         }
 
-        if (carSpawner != null)
+        bool suppressed = GameMode.IsInitialSpawnSuppressed;
+
+        if (carSpawner != null && !suppressed)
         {
             int carCount = Random.Range(1, 4);
             for (int i = 0; i < carCount; i++)
@@ -84,8 +86,11 @@ public class MapManager : MonoBehaviour
         }
 
         // spawn powers and obstacles via dedicated managers (if assigned)
-        powerSpawner?.SpawnPowersOnMap(newMap, mapStartZ, mapEndZ);
-        roadObstacles?.SpawnObstaclesForMap(newMap, powerSpawner != null ? powerSpawner.lanePositions : new float[0], mapStartZ, mapEndZ);
+        if (!suppressed)
+        {
+            powerSpawner?.SpawnPowersOnMap(newMap, mapStartZ, mapEndZ);
+            roadObstacles?.SpawnObstaclesForMap(newMap, powerSpawner != null ? powerSpawner.lanePositions : new float[0], mapStartZ, mapEndZ);
+        }
     }
 
     public void RequestDestroyMap(GameObject map, float delay = -1f)
