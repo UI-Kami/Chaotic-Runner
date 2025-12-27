@@ -106,6 +106,13 @@ public class MeteoriteDestroyer : MonoBehaviour
                 return;
             }
 
+            // If Test Mode is active, do not apply knockback or kill the player. Just play impact and destroy meteor.
+            if (GameMode.IsTestMode)
+            {
+                HandleImpact();
+                return;
+            }
+
             // non-sprint: apply knockback (backward-only), slow-motion, then kill player
             PlayerMovement pm = playerObj.GetComponent<PlayerMovement>();
             if (pm != null)

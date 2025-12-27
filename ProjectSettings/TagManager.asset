@@ -18,6 +18,7 @@ TagManager:
   - LargeBillboard
   - WoodenFence
   - Sword
+  - FPCamera
   layers:
   - Default
   - TransparentFX

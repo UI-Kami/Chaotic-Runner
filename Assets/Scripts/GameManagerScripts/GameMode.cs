@@ -5,6 +5,9 @@ public static class GameMode
     // When true obstacles should not kill or apply forces to player.
     public static bool IsCinematic = true;
 
+    // When true, player should not die — useful for quick in-editor testing and a "Test Mode".
+    public static bool IsTestMode = false;
+
     // Timestamp (Time.time) until which spawns are suppressed. Set via SetInitialSpawnSuppression.
     private static float noSpawnUntil = 0f;
 

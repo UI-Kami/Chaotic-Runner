@@ -215,6 +215,25 @@ public class PlayerAnimation : MonoBehaviour
         animator.SetBool("isSprinting", true);
     }
 
+    /// <summary>
+    /// Applied when the player picks up a debuff that forces first-person view for a short time.
+    /// This will delegate to the FirstPersonDebuff component if present on the player.
+    /// </summary>
+    public void ApplyFirstPersonDebuff(float duration)
+    {
+        if (isDead) return;
+        var deb = GetComponent<FirstPersonDebuff>();
+        if (deb != null)
+        {
+            deb.StartFirstPersonDebuff(duration);
+            Debug.Log($"PlayerAnimation: Applied first-person debuff for {duration} seconds.");
+        }
+        else
+        {
+            Debug.LogWarning("PlayerAnimation: No FirstPersonDebuff component found on player.");
+        }
+    }
+
     // --------------------------------------------------------------------
     public void SetLateral(float horizontalInput)
     {
@@ -317,6 +336,13 @@ public class PlayerAnimation : MonoBehaviour
     public void TriggerDeath()
     {
         if (isDead) return;
+
+        // If Test Mode is active we should not actually die — keep gameplay flowing for testing.
+        if (GameMode.IsTestMode)
+        {
+            Debug.Log("Test Mode active: ignoring death.");
+            return;
+        }
 
         isDead = true;
         isSprinting = false;

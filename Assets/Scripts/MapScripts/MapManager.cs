@@ -75,6 +75,7 @@ public class MapManager : MonoBehaviour
         }
 
         bool suppressed = GameMode.IsInitialSpawnSuppressed;
+        Debug.Log($"MapManager: SpawnNextMap called for {newMap.name} suppressed={suppressed} powerSpawnerAssigned={(powerSpawner!=null)}");
 
         if (carSpawner != null && !suppressed)
         {

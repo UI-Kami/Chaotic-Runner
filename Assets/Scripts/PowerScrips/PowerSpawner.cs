@@ -8,6 +8,11 @@ public class PowerSpawner : MonoBehaviour
     [Tooltip("Optional: a dedicated sword power prefab. If set, sword prefabs may spawn on maps according to swordSpawnChance.")]
     public GameObject swordPrefab;
     [Range(0f,1f)] public float swordSpawnChance = 0.15f;
+
+    [Header("Debuff Settings")]
+    public GameObject debuffPrefab;
+    [Range(0f,1f)] public float debuffSpawnChance = 0.08f; // chance a spawn is a debuff
+
     public Transform powerParent;
     public float powerY = 1.5f;
     public float[] lanePositions = { -27f, -21f, -12.37f, -7.17f, 0.96f, 6f };
@@ -32,7 +37,16 @@ public class PowerSpawner : MonoBehaviour
     // Called by MapManager to spawn powers on the map (2-3 per map)
     public void SpawnPowersOnMap(GameObject map, float mapStartZ, float mapEndZ)
     {
-        if (powerPrefab == null || map == null) return;
+        if (map == null) return;
+
+        // If none of the spawnable prefabs are assigned, nothing to do
+        if (powerPrefab == null && swordPrefab == null && debuffPrefab == null)
+        {
+            Debug.LogWarning("PowerSpawner: No power/sword/debuff prefabs assigned - skipping spawn.");
+            return;
+        }
+
+        Debug.Log($"PowerSpawner: SpawnPowersOnMap called for map={map.name} zRange={mapStartZ:F1}-{mapEndZ:F1} (powerPrefab={(powerPrefab!=null)}, swordPrefab={(swordPrefab!=null)}, debuffPrefab={(debuffPrefab!=null)}), swordChance={swordSpawnChance}, debuffChance={debuffSpawnChance}");
 
         int count = Random.Range(2, 4);
         for (int i = 0; i < count; i++)
@@ -70,16 +84,40 @@ public class PowerSpawner : MonoBehaviour
                 spawnPos.z += attempts * 1.5f;
             }
 
-            // Decide whether this spawn is a sword power or the regular power
+            // Decide whether this spawn is a sword power, a debuff, or the regular power
             bool isSword = false;
+            bool isDebuff = false;
             GameObject power = null;
-            if (swordPrefab != null && Random.value < swordSpawnChance)
+
+            // If the configured spawn chances can overlap, log a helpful message to clarify selection order.
+            if (swordSpawnChance + debuffSpawnChance > 1f)
+            {
+                Debug.LogWarning($"PowerSpawner: swordSpawnChance + debuffSpawnChance > 1.0 (={swordSpawnChance + debuffSpawnChance:F2}). Debuff is checked first and may take precedence.");
+            }
+
+            float r = Random.value;
+            Debug.Log($"PowerSpawner: roll={r:F3} (swordChance={swordSpawnChance:F2}, debuffChance={debuffSpawnChance:F2})");
+
+            // Check debuff first so that debuffs get a chance even when swordChance is high.
+            if (debuffPrefab != null && r < debuffSpawnChance)
+            {
+                power = Instantiate(debuffPrefab);
+                isDebuff = true;
+                Debug.Log($"PowerSpawner: chose DEBUFF at {spawnPos}");
+            }
+            else if (swordPrefab != null && r < debuffSpawnChance + swordSpawnChance)
             {
                 power = Instantiate(swordPrefab);
                 isSword = true;
+                Debug.Log($"PowerSpawner: chose SWORD at {spawnPos}");
             }
             else
             {
+                if (powerPrefab == null && powerPool.Count == 0)
+                {
+                    Debug.Log($"PowerSpawner: falling back but no regular power prefab/pool available — skipping this spawn slot");
+                    continue; // skip this spawn attempt if no regular power available
+                }
                 power = powerPool.Count > 0 ? powerPool.Dequeue() : Instantiate(powerPrefab);
             }
             if (power == null) continue;
@@ -89,7 +127,8 @@ public class PowerSpawner : MonoBehaviour
             power.transform.position = spawnPos;
             power.transform.rotation = Quaternion.identity;
 
-            Debug.Log($"PowerSpawner: Spawned {(isSword ? "Sword" : "Power")} '{power.name}' at {spawnPos} (map={map.name})");
+            string spawnType = isSword ? "Sword" : (isDebuff ? "Debuff" : "Power");
+            Debug.Log($"PowerSpawner: Spawned {spawnType} '{power.name}' at {spawnPos} (map={map.name})");
 
             PowerCleanup cleaner = power.GetComponent<PowerCleanup>();
             if (cleaner == null) cleaner = power.AddComponent<PowerCleanup>();

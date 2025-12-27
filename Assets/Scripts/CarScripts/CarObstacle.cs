@@ -51,6 +51,13 @@ public class CarObstacle : MonoBehaviour
         // 🚗 Normal collision (non-sprinting)
         ExplosionManager.Instance?.SpawnCarExplosion(transform.position);
 
+        // If Test Mode is active, do not apply knockback or trigger death — just destroy the car.
+        if (GameMode.IsTestMode)
+        {
+            Destroy(gameObject, 1f);
+            return;
+        }
+
         // Force backward-only push: use the player's backward direction
         Vector3 pushDir = -collision.gameObject.transform.forward;
         pushDir.y = 0f;
