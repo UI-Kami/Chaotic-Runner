@@ -8,52 +8,43 @@ public class DebuffPower : MonoBehaviour
 
     [Header("Sound Settings")]
     public AudioClip pickupSound;
+    [Range(0f, 1f)]
     public float soundVolume = 1f;
-
-    private AudioSource audioSource;
-
-    void Awake()
-    {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.playOnAwake = false;
-        }
-    }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player"))
+            return;
+
+        PlayerAnimation anim = other.GetComponent<PlayerAnimation>();
+        if (anim != null)
         {
-            PlayerAnimation anim = other.GetComponent<PlayerAnimation>();
-            if (anim != null)
-            {
-                anim.ApplyFirstPersonDebuff(debuffDuration);
-            }
+            anim.ApplyFirstPersonDebuff(debuffDuration);
+            PlayPickupSound(other.transform.position);
+        }
 
-            PlayPickupSound();
-
-            var cleanup = GetComponent<PowerSpawner.PowerCleanup>();
-            if (cleanup != null)
-            {
-                cleanup.HandlePickup();
-            }
-            else
-            {
-                Destroy(gameObject, 0.05f);
-            }
+        // Return to pool or destroy immediately (sound is safe)
+        var cleanup = GetComponent<PowerSpawner.PowerCleanup>();
+        if (cleanup != null)
+        {
+            cleanup.HandlePickup();
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
-    public void PlayPickupSound()
+    private void PlayPickupSound(Vector3 position)
     {
-        if (pickupSound != null)
-        {
-            if (audioSource != null)
-                audioSource.PlayOneShot(pickupSound, soundVolume);
-            else
-                AudioSource.PlayClipAtPoint(pickupSound, transform.position, soundVolume);
-        }
+        if (pickupSound == null)
+            return;
+
+        // Temporary AudioSource survives object destruction
+        AudioSource.PlayClipAtPoint(
+            pickupSound,
+            position,
+            soundVolume
+        );
     }
 }
