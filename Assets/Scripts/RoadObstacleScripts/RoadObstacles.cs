@@ -58,24 +58,31 @@ public class RoadObstacles : MonoBehaviour
         if (obstaclePrefab == null || map == null || lanePositions == null || lanePositions.Length == 0)
             return;
 
+        // Get actual map bounds to ensure spawns are within the physical map
+        GetMapBounds(map, out float actualMapStartZ, out float actualMapEndZ);
+
         for (int laneIndex = 0; laneIndex < lanePositions.Length; laneIndex++)
         {
             int count = Random.Range(minPerLane, maxPerLane + 1);
             for (int i = 0; i < count; i++)
             {
-                float spawnZ = Random.Range(mapStartZ + 1f, mapEndZ - 1f);
+                // Use actual map bounds with conservative buffer
+                float spawnZ = Random.Range(actualMapStartZ + 15f, actualMapEndZ - 15f);
                 Vector3 spawnPos = new Vector3(lanePositions[laneIndex], obstacleY, spawnZ);
 
                 GameObject obs = GetFromPoolOrCreate();
                 if (obs == null) continue;
 
                 obs.SetActive(true);
-                obs.transform.SetParent(map.transform, true); // parent to map
+                // Don't parent to the map! This prevents obstacles spawned at map boundaries from being destroyed
+                // when the map is destroyed. Instead, we track them via ObstacleCleanup.mapAssociation.
+                obs.transform.SetParent(null, false);
                 obs.transform.position = spawnPos;
                 obs.transform.rotation = Vector3.back == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(Vector3.back);
 
                 var cleanup = EnsureCleanup(obs);
                 cleanup.SetPool(this);
+                cleanup.mapAssociation = map; // track which map spawned this obstacle
             }
         }
     }
@@ -106,16 +113,22 @@ public class RoadObstacles : MonoBehaviour
     }
 
     /// <summary>
-    /// Return all obstacle children of a map to the pool. Call this before destroying a map.
+    /// Return all obstacles associated with a map to the pool. Call this before destroying a map.
     /// </summary>
     public void ReturnObstaclesOnMap(GameObject map)
     {
         if (map == null) return;
-        var cleans = map.GetComponentsInChildren<ObstacleCleanup>(true);
-        foreach (var c in cleans)
+        
+        // Find all active obstacles and check their map association
+        ObstacleCleanup[] allCleans = FindObjectsOfType<ObstacleCleanup>(false);
+        foreach (var c in allCleans)
         {
             if (c == null || c.gameObject == null) continue;
-            ReturnObstacleToPool(c.gameObject);
+            // Only return obstacles that were explicitly spawned on this map
+            if (c.mapAssociation == map)
+            {
+                ReturnObstacleToPool(c.gameObject);
+            }
         }
     }
 
@@ -145,6 +158,7 @@ public class RoadObstacles : MonoBehaviour
     // to the manager pool when it collides with the player (either trigger or collision).
     public class ObstacleCleanup : MonoBehaviour
     {
+        public GameObject mapAssociation; // tracks which map this obstacle was spawned on
         private RoadObstacles pool;
 
         public void SetPool(RoadObstacles p) { pool = p; }
@@ -271,5 +285,43 @@ public class RoadObstacles : MonoBehaviour
                 return;
             }
         }
+    }
+
+    // Helper method to get the actual Z bounds of a map based on its colliders/renderers
+    private void GetMapBounds(GameObject map, out float startZ, out float endZ)
+    {
+        Renderer[] renderers = map.GetComponentsInChildren<Renderer>();
+        Collider[] colliders = map.GetComponentsInChildren<Collider>();
+
+        startZ = float.MaxValue;
+        endZ = float.MinValue;
+
+        // Check renderers
+        foreach (Renderer r in renderers)
+        {
+            if (r.bounds.center.z - r.bounds.extents.z < startZ)
+                startZ = r.bounds.center.z - r.bounds.extents.z;
+            if (r.bounds.center.z + r.bounds.extents.z > endZ)
+                endZ = r.bounds.center.z + r.bounds.extents.z;
+        }
+
+        // Check colliders
+        foreach (Collider c in colliders)
+        {
+            Bounds b = c.bounds;
+            if (b.center.z - b.extents.z < startZ)
+                startZ = b.center.z - b.extents.z;
+            if (b.center.z + b.extents.z > endZ)
+                endZ = b.center.z + b.extents.z;
+        }
+
+        // Fallback if no renderers or colliders found
+        if (startZ == float.MaxValue || endZ == float.MinValue)
+        {
+            startZ = map.transform.position.z;
+            endZ = map.transform.position.z + 200f; // default map length
+        }
+
+        Debug.Log($"RoadObstacles: Map bounds calculated: {startZ:F1} to {endZ:F1} (length: {endZ - startZ:F1})");
     }
 }

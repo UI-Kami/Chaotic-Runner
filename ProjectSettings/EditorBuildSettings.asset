@@ -5,15 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scalable Grid Prototype Materials/Template Scenes/Dark_SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
-    path: Assets/Scenes/3d.unity
-    guid: e41b5bbdc6cfc6e4f93e0ce0b929ba5e
   - enabled: 1
     path: Assets/Scenes/Cinematic Menu.unity
     guid: a2096ed32b67d4a49a9b7b0a404375ed
+  - enabled: 1
+    path: Assets/Scenes/3d.unity
+    guid: e41b5bbdc6cfc6e4f93e0ce0b929ba5e
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: c09d7e46abb460a4496127f44d0b5460, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 56d09fa37a2810e43a5ad0b2d84b5ffe, type: 2}

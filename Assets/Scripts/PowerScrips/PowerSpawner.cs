@@ -46,7 +46,10 @@ public class PowerSpawner : MonoBehaviour
             return;
         }
 
-        Debug.Log($"PowerSpawner: SpawnPowersOnMap called for map={map.name} zRange={mapStartZ:F1}-{mapEndZ:F1} (powerPrefab={(powerPrefab!=null)}, swordPrefab={(swordPrefab!=null)}, debuffPrefab={(debuffPrefab!=null)}), swordChance={swordSpawnChance}, debuffChance={debuffSpawnChance}");
+        // Get actual map bounds to ensure spawns are within the physical map
+        GetMapBounds(map, out float actualMapStartZ, out float actualMapEndZ);
+
+        Debug.Log($"PowerSpawner: SpawnPowersOnMap called for map={map.name} originalZRange={mapStartZ:F1}-{mapEndZ:F1} actualZRange={actualMapStartZ:F1}-{actualMapEndZ:F1} (powerPrefab={(powerPrefab!=null)}, swordPrefab={(swordPrefab!=null)}, debuffPrefab={(debuffPrefab!=null)}), swordChance={swordSpawnChance}, debuffChance={debuffSpawnChance}");
 
         int count = Random.Range(2, 4);
         for (int i = 0; i < count; i++)
@@ -60,7 +63,8 @@ public class PowerSpawner : MonoBehaviour
             do
             {
                 float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-                float spawnZ = Random.Range(mapStartZ + 5f, mapEndZ - 5f);
+                // Use actual map bounds with conservative buffer
+                float spawnZ = Random.Range(actualMapStartZ + 15f, actualMapEndZ - 15f);
                 spawnPos = new Vector3(laneX, powerY, spawnZ);
 
                 // Check existing powers already parented to the map to avoid overlap
@@ -123,7 +127,9 @@ public class PowerSpawner : MonoBehaviour
             if (power == null) continue;
 
             power.SetActive(true);
-            power.transform.SetParent(map.transform, true);
+            // Don't parent to the map! This prevents powers spawned at map boundaries from being destroyed
+            // when the map is destroyed. Instead, we'll track them independently in PowerCleanup.
+            power.transform.SetParent(null, false);
             power.transform.position = spawnPos;
             power.transform.rotation = Quaternion.identity;
 
@@ -134,6 +140,7 @@ public class PowerSpawner : MonoBehaviour
             if (cleaner == null) cleaner = power.AddComponent<PowerCleanup>();
             cleaner.fallDestroyY = powerFallDestroyY;
             cleaner.SetPoolReference(this);
+            cleaner.mapAssociation = map; // track which map spawned this power for debugging
         }
     }
 
@@ -161,15 +168,22 @@ public class PowerSpawner : MonoBehaviour
             powerPool.Enqueue(power);
     }
 
-    // Return all powers under the map back to the pool
+    // Return all powers associated with a map back to the pool
+    // (Powers are no longer children of the map, so we check if they were spawned on this map)
     public void ReturnPowersOnMap(GameObject map)
     {
         if (map == null) return;
-        PowerCleanup[] cleans = map.GetComponentsInChildren<PowerCleanup>(true);
-        foreach (var c in cleans)
+        
+        // Find all active powers and check their map association
+        PowerCleanup[] allCleans = FindObjectsOfType<PowerCleanup>(false);
+        foreach (var c in allCleans)
         {
             if (c == null || c.gameObject == null) continue;
-            ReturnPowerToPool(c.gameObject);
+            // Only return powers that were explicitly spawned on this map
+            if (c.mapAssociation == map)
+            {
+                ReturnPowerToPool(c.gameObject);
+            }
         }
     }
 
@@ -177,6 +191,7 @@ public class PowerSpawner : MonoBehaviour
     public class PowerCleanup : MonoBehaviour
     {
         public float fallDestroyY = -5f;
+        public GameObject mapAssociation; // tracks which map this power was spawned on
         // private TimedMapSpawners.PowerCleanup _oldTypeRef; // unused, compatibility note
         private PowerSpawner poolManager;
         private Transform player;
@@ -219,5 +234,43 @@ public class PowerSpawner : MonoBehaviour
             if (!gameObject.activeInHierarchy) yield break;
             poolManager?.ReturnPowerToPool(gameObject);
         }
+    }
+
+    // Helper method to get the actual Z bounds of a map based on its colliders/renderers
+    private void GetMapBounds(GameObject map, out float startZ, out float endZ)
+    {
+        Renderer[] renderers = map.GetComponentsInChildren<Renderer>();
+        Collider[] colliders = map.GetComponentsInChildren<Collider>();
+
+        startZ = float.MaxValue;
+        endZ = float.MinValue;
+
+        // Check renderers
+        foreach (Renderer r in renderers)
+        {
+            if (r.bounds.center.z - r.bounds.extents.z < startZ)
+                startZ = r.bounds.center.z - r.bounds.extents.z;
+            if (r.bounds.center.z + r.bounds.extents.z > endZ)
+                endZ = r.bounds.center.z + r.bounds.extents.z;
+        }
+
+        // Check colliders
+        foreach (Collider c in colliders)
+        {
+            Bounds b = c.bounds;
+            if (b.center.z - b.extents.z < startZ)
+                startZ = b.center.z - b.extents.z;
+            if (b.center.z + b.extents.z > endZ)
+                endZ = b.center.z + b.extents.z;
+        }
+
+        // Fallback if no renderers or colliders found
+        if (startZ == float.MaxValue || endZ == float.MinValue)
+        {
+            startZ = map.transform.position.z;
+            endZ = map.transform.position.z + 200f; // default map length
+        }
+
+        Debug.Log($"PowerSpawner: Map bounds calculated: {startZ:F1} to {endZ:F1} (length: {endZ - startZ:F1})");
     }
 }

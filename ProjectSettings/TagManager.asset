@@ -19,6 +19,7 @@ TagManager:
   - WoodenFence
   - Sword
   - FPCamera
+  - CineCamera
   layers:
   - Default
   - TransparentFX

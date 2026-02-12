@@ -289,7 +289,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -3148489713236713513, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0.001
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 240792856786341099, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Depth
@@ -325,7 +325,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3544570202471997422, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_Volume
-      value: 0.001
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 3926933660256365478, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_LocalPosition.y
@@ -356,9 +356,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 498470743}
     - target: {fileID: 4660059673018516447, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: followSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4660059673018516447, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: neckTransform
       value: 
       objectReference: {fileID: 571719864}
+    - target: {fileID: 4660059673018516447, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
+      propertyPath: transitionDuration
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4818790778304352458, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_RenderPostProcessing
       value: 1
@@ -377,11 +385,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: normalSpeed
-      value: 40
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: sprintSpeed
-      value: 70
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: knockbackDecay
@@ -389,7 +397,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5613354794839854054, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: horizontalSpeed
-      value: 25
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7024137703562051979, guid: e9766bfd4359a504cad1bdfbf5a72d10, type: 3}
       propertyPath: m_IsActive
@@ -565,7 +573,7 @@ MonoBehaviour:
   overlapFix: 2.5
   autoDetectLength: 1
   startImmediately: 1
-  defaultDestroyDelay: 2
+  defaultDestroyDelay: 5
   carSpawner: {fileID: 952538920}
   powerSpawner: {fileID: 502562900}
   roadObstacles: {fileID: 1345862130}

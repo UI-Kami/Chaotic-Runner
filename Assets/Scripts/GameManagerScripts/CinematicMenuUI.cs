@@ -20,6 +20,10 @@ public class CinematicMenuUI : MonoBehaviour
     [Tooltip("Fixed initial delay (seconds) if not using random")]
     public float fixedStartDelay = 5f;
 
+    [Header("Post-Processing")]
+    [Tooltip("Optional: Post-processing volume to enable when menu loads")]
+    public UnityEngine.Rendering.Volume postProcessingVolume;
+
     [Header("Test Mode UI")]
     [Tooltip("Optional TextMeshPro label to show Test Mode state on the Test button.")]
     public TMPro.TMP_Text testModeButtonText;
@@ -30,7 +34,38 @@ public class CinematicMenuUI : MonoBehaviour
         GameMode.IsCinematic = true;
         Time.timeScale = 1f;
 
+        // Disable the main camera from gameplay so cinematic cameras are visible
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            mainCamera.gameObject.SetActive(false);
+            Debug.Log("[CinematicMenuUI] Main camera disabled to show cinematic cameras");
+        }
+
+        // Initialize post-processing if available
+        InitializePostProcessing();
+
         UpdateTestModeUI();
+    }
+
+    private void InitializePostProcessing()
+    {
+        // Try to find post-processing volume if not assigned
+        if (postProcessingVolume == null)
+        {
+            postProcessingVolume = FindObjectOfType<UnityEngine.Rendering.Volume>();
+        }
+
+        // Enable post-processing volume
+        if (postProcessingVolume != null)
+        {
+            postProcessingVolume.enabled = true;
+            Debug.Log("[CinematicMenuUI] Post-processing volume enabled");
+        }
+        else
+        {
+            Debug.LogWarning("[CinematicMenuUI] No post-processing volume found in scene");
+        }
     }
 
     // --------------------------------------------------------------------

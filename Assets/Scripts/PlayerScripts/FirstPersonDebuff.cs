@@ -12,7 +12,7 @@ public class FirstPersonDebuff : MonoBehaviour
     public Camera fpCamera;
 
     [Header("Transition")]
-    public float transitionDuration = 0.6f;
+    public float transitionDuration = 1.2f;
     public float followSpeed = 12f;
     public float rotationSmooth = 14f;
 
