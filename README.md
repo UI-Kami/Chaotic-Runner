@@ -58,7 +58,7 @@ Scattered throughout the city are orbs of pure chaos. Some will make you an unst
 * **[Spacebar]:** Jump
 
 ---
-GAME BY: 
-KAMRAN ALI
-TAHA NAVEED
-ABDUL NAFAY
+* **GAME BY: 
+* **KAMRAN ALI
+* **TAHA NAVEED
+* **ABDUL NAFAY
