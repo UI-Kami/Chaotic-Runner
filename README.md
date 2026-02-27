@@ -35,10 +35,12 @@ Scattered throughout the city are orbs of pure chaos. Some will make you an unst
 | :--- | :---: | :--- |
 | **Blade Vortex** | 🟢 Power-Up | Summons an orbital ring of spinning swords around the player. Anything it touches—cars, barriers, meteors—is instantly destroyed. |
 <img width="288" height="349" alt="{54E983CC-58E8-4D10-8751-0961D301CDF3}" src="https://github.com/user-attachments/assets/77a4f3fa-6d43-4aaf-9aef-d63975c8a497" />
-
+| Item | Type | Effect |
+| :--- | :---: | :--- |
 | **Phantom Sprint** | 🟢 Power-Up | Grants a massive speed boost and temporary intangibility. Literally run *through* any obstacle without taking damage. |
 <img width="149" height="159" alt="{1C7DA87A-AB1C-47CF-8249-AA6EB455494F}" src="https://github.com/user-attachments/assets/26551a13-dd64-4a26-ab6d-8742111316cc" />
-
+| Item | Type | Effect |
+| :--- | :---: | :--- |
 | **First-Person Chaos** | 🔴 Debuff | Forces the camera into a First-Person perspective. Combine this with our chaotic traversal animations and ragdoll physics for a truly disorienting, hilarious nightmare. |
 <img width="328" height="243" alt="{15418B13-82E9-4DBA-A195-B0902FCEBB5C}" src="https://github.com/user-attachments/assets/d340fcf8-5f04-47c2-a0f3-71dec4be22f4" />
 <img width="785" height="451" alt="image" src="https://github.com/user-attachments/assets/632788b0-466a-4bb9-a27b-e50df0f99e65" />
