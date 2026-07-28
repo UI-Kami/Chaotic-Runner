@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement; // For restart or future handling
 using System.Collections;
 
@@ -46,6 +46,13 @@ public class PlayerAnimation : MonoBehaviour
     private float rollCooldownTimer = 0f;
     private float jumpLockTimer = 0f;
     private float deathTimer = 0f;
+
+    [Header("Stunt / Fence Jump Settings")]
+    [Tooltip("Duration (seconds) of stunt invulnerability and vaulting state.")]
+    public float stuntDuration = 1.2f;
+    private bool isPerformingStunt = false;
+    private float stuntTimer = 0f;
+
     // Nearby fence reference (set by obstacle when player is in detection rays)
     private ObstacleBehaviorScript nearbyFence = null;
 
@@ -54,8 +61,14 @@ public class PlayerAnimation : MonoBehaviour
     public string[] fenceJumpTriggers = new string[0];
 
     public bool IsSprinting() => isSprinting;
+    public bool IsPerformingStunt() => isPerformingStunt || stuntTimer > 0f;
+    public bool HasNearbyFence() => nearbyFence != null;
 
-
+    public void StartStunt(float duration = -1f)
+    {
+        isPerformingStunt = true;
+        stuntTimer = duration > 0f ? duration : stuntDuration;
+    }
 
     void Start()
     {
@@ -72,6 +85,13 @@ public class PlayerAnimation : MonoBehaviour
             if (deathTimer >= deathGameFreezeDelay)
                 Time.timeScale = 0f; // Freeze the game after death
             return;
+        }
+
+        if (stuntTimer > 0f)
+        {
+            stuntTimer -= Time.deltaTime;
+            if (stuntTimer <= 0f)
+                isPerformingStunt = false;
         }
 
         HandleSprinting();
@@ -155,26 +175,27 @@ public class PlayerAnimation : MonoBehaviour
         var controller = movement.GetComponent<CharacterController>();
         bool grounded = controller.isGrounded;
 
+        if (Input.GetKeyDown(KeyCode.Space) && !isSliding && !isRolling && jumpLockTimer <= 0f)
+        {
+            // If a nearby fence is registered, perform a fence jump regardless of grounded state
+            if (nearbyFence != null && !IsMovementLocked())
+            {
+                var targetFence = nearbyFence;
+                // Clear the nearby fence reference first so we don't accidentally re-trigger
+                nearbyFence = null;
+                // Invoke fence's PerformFenceJump which also triggers the animation via TriggerFenceJumpRandom
+                targetFence.PerformFenceJump(gameObject);
+            }
+            else if (grounded)
+            {
+                animator.SetTrigger("jump");
+                animator.SetBool("isJumping", true);
+            }
+        }
+
         if (grounded)
         {
             animator.SetBool("isJumping", false);
-
-            if (Input.GetKeyDown(KeyCode.Space) && !isSliding && !isRolling && jumpLockTimer <= 0f)
-            {
-                // If a nearby fence is registered, perform a fence jump instead of the normal jump
-                if (nearbyFence != null && !IsMovementLocked())
-                {
-                    // Invoke fence's PerformFenceJump which also triggers the animation via TriggerFenceJumpRandom
-                    nearbyFence.PerformFenceJump(gameObject);
-                    // Clear the nearby fence so we don't accidentally re-trigger
-                    nearbyFence = null;
-                }
-                else
-                {
-                    animator.SetTrigger("jump");
-                    animator.SetBool("isJumping", true);
-                }
-            }
         }
         else
         {
@@ -357,6 +378,9 @@ public class PlayerAnimation : MonoBehaviour
 
         deathTimer = 0f;
         Debug.Log("💀 Player has died!");
+
+        // Reset score back to 0 on death so the next run starts fresh
+        ScoreManager.Instance?.ResetScore();
 
         // Optionally load main menu after the death freeze delay
         if (loadMainMenuOnDeath)

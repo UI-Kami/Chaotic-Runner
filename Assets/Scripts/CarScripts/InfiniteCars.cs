@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CarSpawnerPool : MonoBehaviour
@@ -20,6 +20,10 @@ public class CarSpawnerPool : MonoBehaviour
 
     [Header("Car Movement")]
     public float carSpeed = 25f;
+
+    [Header("Lane Distribution & Spacing")]
+    [Tooltip("Minimum distance (meters) between cars in the same lane.")]
+    public float minCarSpacingInLane = 35f;
 
     private readonly Queue<GameObject> carPool = new Queue<GameObject>();
     private readonly List<GameObject> activeCars = new List<GameObject>();
@@ -117,14 +121,86 @@ public class CarSpawnerPool : MonoBehaviour
         }
     }
 
-    // 🚘 Spawns a pooled car in a random lane
+    // Finds the optimal lane index to balance car distribution across lanes and prevent clustering
+    int GetBestLaneIndex(float targetZ)
+    {
+        if (lanePositions == null || lanePositions.Length == 0) return 0;
+
+        List<int> validLanes = new List<int>();
+        Dictionary<int, int> laneCarCounts = new Dictionary<int, int>();
+
+        for (int i = 0; i < lanePositions.Length; i++)
+        {
+            laneCarCounts[i] = 0;
+            bool spaceOk = true;
+            float laneX = lanePositions[i];
+
+            foreach (var car in activeCars)
+            {
+                if (car == null || !car.activeInHierarchy) continue;
+
+                if (Mathf.Abs(car.transform.position.x - laneX) < 1.5f)
+                {
+                    laneCarCounts[i]++;
+                    if (Mathf.Abs(car.transform.position.z - targetZ) < minCarSpacingInLane)
+                    {
+                        spaceOk = false;
+                    }
+                }
+            }
+
+            if (spaceOk)
+            {
+                validLanes.Add(i);
+            }
+        }
+
+        if (validLanes.Count > 0)
+        {
+            int minCars = int.MaxValue;
+            foreach (int idx in validLanes)
+            {
+                if (laneCarCounts[idx] < minCars)
+                    minCars = laneCarCounts[idx];
+            }
+
+            List<int> bestLanes = new List<int>();
+            foreach (int idx in validLanes)
+            {
+                if (laneCarCounts[idx] == minCars)
+                    bestLanes.Add(idx);
+            }
+
+            return bestLanes[Random.Range(0, bestLanes.Count)];
+        }
+
+        int globalMin = int.MaxValue;
+        foreach (var kvp in laneCarCounts)
+        {
+            if (kvp.Value < globalMin)
+                globalMin = kvp.Value;
+        }
+
+        List<int> fallbackLanes = new List<int>();
+        foreach (var kvp in laneCarCounts)
+        {
+            if (kvp.Value == globalMin)
+                fallbackLanes.Add(kvp.Key);
+        }
+
+        return fallbackLanes[Random.Range(0, fallbackLanes.Count)];
+    }
+
+    // 🚘 Spawns a pooled car using balanced lane distribution
     void SpawnCar()
     {
         GameObject car = GetCarFromPool();
         if (car == null) return;
 
-        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
-        Vector3 spawnPos = new Vector3(laneX, laneY, nextSpawnZ + Random.Range(-5f, 5f));
+        float targetZ = nextSpawnZ + Random.Range(-5f, 5f);
+        int laneIdx = GetBestLaneIndex(targetZ);
+        float laneX = lanePositions[laneIdx];
+        Vector3 spawnPos = new Vector3(laneX, laneY, targetZ);
 
         car.transform.SetPositionAndRotation(spawnPos, Quaternion.Euler(0f, 180f, 0f));
         car.SetActive(true);
@@ -137,8 +213,9 @@ public class CarSpawnerPool : MonoBehaviour
         GameObject car = GetCarFromPool();
         if (car == null) return;
 
-        float laneX = lanePositions[Random.Range(0, lanePositions.Length)];
         float zPos = Random.Range(mapStartZ + 20f, mapEndZ - 20f);
+        int laneIdx = GetBestLaneIndex(zPos);
+        float laneX = lanePositions[laneIdx];
         Vector3 spawnPos = new Vector3(laneX, laneY, zPos);
 
         car.transform.SetPositionAndRotation(spawnPos, Quaternion.Euler(0f, 180f, 0f));

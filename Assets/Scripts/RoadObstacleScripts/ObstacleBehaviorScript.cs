@@ -8,7 +8,7 @@ public class ObstacleBehaviorScript : MonoBehaviour
     [SerializeField] private float rayStartHeight = 1.0f;
 
     [Tooltip("How far in front of the fence to detect the player.")]
-    [SerializeField] private float detectionDistance = 5f;
+    [SerializeField] private float detectionDistance = 8.5f;
 
     [Tooltip("Minimum dot product (0..1) between fence forward and direction to player to consider it 'in-front'.")]
     [SerializeField] private float inFrontDotThreshold = 0.25f;
@@ -42,6 +42,20 @@ public class ObstacleBehaviorScript : MonoBehaviour
     private float lastTriggeredTime = -100f;
     // When slashed by a sword, ignore detection briefly to avoid clashing behaviors
     private float recentlySlashedUntil = -100f;
+    private bool isVaulted = false;
+
+    public bool IsVaulted() => isVaulted;
+    public void ResetVaultedState()
+    {
+        isVaulted = false;
+        recentlySlashedUntil = -100f;
+        lastTriggeredTime = -100f;
+    }
+
+    void OnEnable()
+    {
+        ResetVaultedState();
+    }
 
     void Update()
     {
@@ -51,16 +65,21 @@ public class ObstacleBehaviorScript : MonoBehaviour
     // Public: perform the fence jump effect on the specified player (trigger animation and apply impulses)
     public void PerformFenceJump(GameObject playerObj)
     {
-        if (playerObj == null) return;
+        if (playerObj == null || isVaulted) return;
+        isVaulted = true;
 
         var pa = playerObj.GetComponent<PlayerAnimation>();
         var pm = playerObj.GetComponent<PlayerMovement>();
         if (pa == null || pm == null) return;
 
+        // Activate stunt state on player (provides temporary collision invulnerability during vault)
+        pa.StartStunt(1.2f);
+        pa.ClearNearbyFence(this);
+
         // Trigger animation on player with randomized style
         pa.TriggerFenceJumpRandom();
 
-        // Apply knockback/push
+        // Apply push impulse with clean vertical velocity override
         Vector3 pushDir = transform.forward;
         pushDir.y = 0f;
         if (pushDir.sqrMagnitude < 0.0001f)
@@ -68,11 +87,16 @@ public class ObstacleBehaviorScript : MonoBehaviour
         else
             pushDir.Normalize();
 
-        pm.ApplyKnockback(pushDir, fenceJumpHorizontalImpulse, fenceJumpUpImpulse);
+        pm.ApplyFenceJumpImpulse(pushDir, fenceJumpHorizontalImpulse, fenceJumpUpImpulse);
+
+        // Temporarily pause detection on this obstacle to avoid double triggers
+        OnSlashed(2.0f);
     }
 
     private void DetectPlayer()
     {
+        if (isVaulted) return;
+
         // If this fence was just slashed, ignore detection until the short timer expires
         if (Time.time < recentlySlashedUntil) return;
 
@@ -97,7 +121,8 @@ public class ObstacleBehaviorScript : MonoBehaviour
             // Lateral offset of origin across fence local X (-rayWidth/2 .. +rayWidth/2)
             Vector3 origin = baseOrigin + transform.right * (t * rayWidth);
 
-            if (Physics.Raycast(origin, dir, out hitInfo, detectionDistance))
+            // Use SphereCast for generous collision detection (catches airborne & near-miss players)
+            if (Physics.SphereCast(origin, 0.75f, dir, out hitInfo, detectionDistance))
             {
                 if (!hitInfo.collider.CompareTag("Player"))
                     continue;

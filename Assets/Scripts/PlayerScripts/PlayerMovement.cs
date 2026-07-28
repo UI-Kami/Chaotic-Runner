@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -73,8 +73,12 @@ public class PlayerMovement : MonoBehaviour
                 animationScript != null &&
                 !animationScript.IsMovementLocked())
             {
-                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-                isJumping = true;
+                // Only trigger standard jump if player is NOT performing a fence jump (stunt)
+                if (!animationScript.HasNearbyFence())
+                {
+                    velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    isJumping = true;
+                }
             }
         }
         else
@@ -101,6 +105,26 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public float GetVerticalVelocity() => velocity.y;
+
+    // Public API: apply impulse specifically for a fence jump/stunt
+    // Overrides vertical velocity directly rather than stacking on top of normal jump height
+    public void ApplyFenceJumpImpulse(Vector3 direction, float horizontalMagnitude, float verticalVelocity)
+    {
+        if (controller == null) controller = GetComponent<CharacterController>();
+
+        Vector3 dir = new Vector3(direction.x, 0f, direction.z);
+        if (dir.sqrMagnitude < 0.0001f)
+            dir = transform.forward;
+
+        dir.Normalize();
+        externalHorizontal += dir * horizontalMagnitude;
+
+        if (verticalVelocity > 0f)
+        {
+            velocity.y = verticalVelocity;
+            isJumping = true;
+        }
+    }
 
     // Public API: apply an instantaneous knockback impulse to the player.
     // direction: world-space direction (Y will be ignored for horizontal part)

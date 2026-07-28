@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 using System.IO;
@@ -56,13 +56,16 @@ public class ScoreManager : MonoBehaviour
                 binder.BindUI(this);
         }
 
+        // Reset score to 0 every time a new scene loads so each run starts fresh
+        score = 0f;
         UpdateUI();
     }
 
     private void Update()
     {
-        // Only track score during gameplay
-        if (GameMode.IsCinematic) return;
+        // Do not track score during cinematic mode or during the initial spawn-suppression window
+        // (the spawn suppression period covers the transition / cinematic intro before gameplay begins)
+        if (GameMode.IsCinematic || GameMode.IsInitialSpawnSuppressed) return;
 
         score += Time.deltaTime * scoreRate;
         UpdateUI();

@@ -57,4 +57,30 @@ public class AudioManager : MonoBehaviour
         // Aggressive falloff at low values (feels natural)
         return Mathf.Lerp(-40f, 0f, Mathf.Pow(value, 0.5f));
     }
+
+    /// <summary>
+    /// Play a 2D SFX clip instantly at full volume with zero 3D spatial delay or distance attenuation.
+    /// </summary>
+    public static void PlaySFX2D(AudioClip clip, float volume = 1f)
+    {
+        if (clip == null) return;
+
+        GameObject soundObj = new GameObject($"SFX_2D_{clip.name}");
+        AudioSource source = soundObj.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.spatialBlend = 0f; // 2D (non-spatial) for immediate crisp playback
+        source.volume = Mathf.Clamp01(volume);
+        source.pitch = 1f;
+        source.playOnAwake = false;
+
+        if (Instance != null && Instance.audioMixer != null)
+        {
+            var sfxGroup = Instance.audioMixer.FindMatchingGroups("SFX");
+            if (sfxGroup != null && sfxGroup.Length > 0)
+                source.outputAudioMixerGroup = sfxGroup[0];
+        }
+
+        source.Play();
+        Destroy(soundObj, clip.length + 0.1f);
+    }
 }

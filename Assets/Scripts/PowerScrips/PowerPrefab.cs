@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class SprintPower : MonoBehaviour
 {
@@ -39,11 +39,6 @@ public class SprintPower : MonoBehaviour
         if (pickupSound == null)
             return;
 
-        // Creates a temporary AudioSource that survives object destruction
-        AudioSource.PlayClipAtPoint(
-            pickupSound,
-            transform.position,
-            soundVolume
-        );
+        AudioManager.PlaySFX2D(pickupSound, soundVolume);
     }
 }

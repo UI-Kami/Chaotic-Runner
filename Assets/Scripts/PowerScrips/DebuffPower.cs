@@ -40,11 +40,6 @@ public class DebuffPower : MonoBehaviour
         if (pickupSound == null)
             return;
 
-        // Temporary AudioSource survives object destruction
-        AudioSource.PlayClipAtPoint(
-            pickupSound,
-            position,
-            soundVolume
-        );
+        AudioManager.PlaySFX2D(pickupSound, soundVolume);
     }
 }

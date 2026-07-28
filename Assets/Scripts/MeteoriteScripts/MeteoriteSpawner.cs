@@ -49,10 +49,10 @@ public class MeteoriteSpawner : MonoBehaviour
 
     private void LaunchMeteoriteWave()
     {
-        if (meteoritePrefab == null || player == null || mapManager == null || mapManager.activeMaps.Count == 0) return;
+        if (meteoritePrefab == null || player == null) return;
 
-        GameObject lastMap = mapManager.GetLastMap();
-        float spawnZ = lastMap.transform.position.z + (mapManager.GetMapLength() * 0.5f);
+        // Spawn 800m ahead of the player so meteorites land well in front during the run
+        float spawnZ = player.position.z + 800f;
 
         int meteorCount = Random.Range(minMeteorsPerWave, maxMeteorsPerWave + 1);
 
@@ -72,7 +72,7 @@ public class MeteoriteSpawner : MonoBehaviour
             {
                 Vector3 target = player.position + new Vector3(Random.Range(-5f, 5f), -15f, Random.Range(10f, 25f));
                 Vector3 direction = (target - spawnPos).normalized;
-                rb.velocity = direction * meteoriteSpeed;
+                rb.linearVelocity = direction * meteoriteSpeed;
                 rb.useGravity = true;
                 rb.AddTorque(Random.insideUnitSphere * 20f, ForceMode.VelocityChange);
             }

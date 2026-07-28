@@ -14,9 +14,11 @@ public class RoadObstacles : MonoBehaviour
     public GameObject[] obstaclePrefab;
     public int poolSize = 20;
 
-    [Header("Per-Lane Settings")]
-    public int minPerLane = 1;
-    public int maxPerLane = 3;
+    [Header("Per-Map Obstacle Controls")]
+    [Tooltip("Maximum total road obstacles to spawn per map segment.")]
+    public int maxObstaclesPerMap = 4;
+    [Tooltip("Minimum Z spacing (meters) between obstacles in the same lane.")]
+    public float minZSpacingInLane = 40f;
     public float obstacleY = 0f;
 
     // internal pool storage
@@ -61,29 +63,53 @@ public class RoadObstacles : MonoBehaviour
         // Get actual map bounds to ensure spawns are within the physical map
         GetMapBounds(map, out float actualMapStartZ, out float actualMapEndZ);
 
-        for (int laneIndex = 0; laneIndex < lanePositions.Length; laneIndex++)
+        // Track Z positions of obstacles spawned per lane
+        Dictionary<int, List<float>> laneSpawnedZ = new Dictionary<int, List<float>>();
+        for (int i = 0; i < lanePositions.Length; i++)
+            laneSpawnedZ[i] = new List<float>();
+
+        List<int> availableLanes = new List<int>();
+        for (int i = 0; i < lanePositions.Length; i++)
+            availableLanes.Add(i);
+
+        int totalSpawned = 0;
+        int targetSpawnCount = Mathf.Min(maxObstaclesPerMap, lanePositions.Length * 2);
+
+        for (int attempt = 0; attempt < targetSpawnCount * 4 && totalSpawned < targetSpawnCount; attempt++)
         {
-            int count = Random.Range(minPerLane, maxPerLane + 1);
-            for (int i = 0; i < count; i++)
+            int laneIndex = availableLanes[Random.Range(0, availableLanes.Count)];
+            float laneX = lanePositions[laneIndex];
+
+            // Use actual map bounds with conservative buffers
+            float spawnZ = Random.Range(actualMapStartZ + 25f, actualMapEndZ - 25f);
+
+            // Verify minimum Z spacing from existing obstacles in the same lane
+            bool spaceValid = true;
+            foreach (float existingZ in laneSpawnedZ[laneIndex])
             {
-                // Use actual map bounds with conservative buffer
-                float spawnZ = Random.Range(actualMapStartZ + 15f, actualMapEndZ - 15f);
-                Vector3 spawnPos = new Vector3(lanePositions[laneIndex], obstacleY, spawnZ);
-
-                GameObject obs = GetFromPoolOrCreate();
-                if (obs == null) continue;
-
-                obs.SetActive(true);
-                // Don't parent to the map! This prevents obstacles spawned at map boundaries from being destroyed
-                // when the map is destroyed. Instead, we track them via ObstacleCleanup.mapAssociation.
-                obs.transform.SetParent(null, false);
-                obs.transform.position = spawnPos;
-                obs.transform.rotation = Vector3.back == Vector3.zero ? Quaternion.identity : Quaternion.LookRotation(Vector3.back);
-
-                var cleanup = EnsureCleanup(obs);
-                cleanup.SetPool(this);
-                cleanup.mapAssociation = map; // track which map spawned this obstacle
+                if (Mathf.Abs(spawnZ - existingZ) < minZSpacingInLane)
+                {
+                    spaceValid = false;
+                    break;
+                }
             }
+
+            if (!spaceValid) continue;
+
+            GameObject obs = GetFromPoolOrCreate();
+            if (obs == null) continue;
+
+            obs.SetActive(true);
+            obs.transform.SetParent(null, false);
+            obs.transform.position = new Vector3(laneX, obstacleY, spawnZ);
+            obs.transform.rotation = Quaternion.LookRotation(Vector3.back);
+
+            laneSpawnedZ[laneIndex].Add(spawnZ);
+            totalSpawned++;
+
+            var cleanup = EnsureCleanup(obs);
+            cleanup.SetPool(this);
+            cleanup.mapAssociation = map;
         }
     }
 
@@ -102,6 +128,10 @@ public class RoadObstacles : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
             rb.isKinematic = false;
         }
+
+        // reset behavior state
+        var obsBehavior = obs.GetComponent<ObstacleBehaviorScript>();
+        obsBehavior?.ResetVaultedState();
 
         // unparent and move off-screen
         obs.transform.SetParent(null);
@@ -178,6 +208,10 @@ public class RoadObstacles : MonoBehaviour
 
         void OnCollisionEnter(Collision other)
         {
+            // Ignore collisions if obstacle was already vaulted over
+            var obsBehavior = GetComponent<ObstacleBehaviorScript>();
+            if (obsBehavior != null && obsBehavior.IsVaulted()) return;
+
             // Player hit
             if (other.collider.CompareTag("Player"))
             {
@@ -185,12 +219,19 @@ public class RoadObstacles : MonoBehaviour
                 var pa = playerObj.GetComponent<PlayerAnimation>();
                 var pm = playerObj.GetComponent<PlayerMovement>();
 
-                if (pa != null && pa.IsSprinting())
+                if (pa != null && (pa.IsSprinting() || pa.IsPerformingStunt()))
                 {
-                    // Player powered/sprinting: spawn plasma, destroy obstacle
+                    // Player powered/sprinting or performing stunt vault: spawn plasma, destroy obstacle
                     ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
                     TimeManager.Instance?.TriggerSlowMotion(2.5f);
                     pool?.ReturnObstacleToPool(gameObject);
+                    return;
+                }
+
+                // Safety grace buffer: if player collides with fence while holding/pressing jump, execute fence jump instead of death
+                if (obsBehavior != null && pa != null && pa.HasNearbyFence() && Input.GetKey(KeyCode.Space))
+                {
+                    obsBehavior.PerformFenceJump(playerObj);
                     return;
                 }
 
@@ -230,6 +271,10 @@ public class RoadObstacles : MonoBehaviour
 
         void OnTriggerEnter(Collider other)
         {
+            // Ignore triggers if obstacle was already vaulted over
+            var obsBehavior = GetComponent<ObstacleBehaviorScript>();
+            if (obsBehavior != null && obsBehavior.IsVaulted()) return;
+
             // Player hit (trigger collider path)
             if (other.CompareTag("Player"))
             {
@@ -237,11 +282,18 @@ public class RoadObstacles : MonoBehaviour
                 var pa = playerObj.GetComponent<PlayerAnimation>();
                 var pm = playerObj.GetComponent<PlayerMovement>();
 
-                if (pa != null && pa.IsSprinting())
+                if (pa != null && (pa.IsSprinting() || pa.IsPerformingStunt()))
                 {
                     ExplosionManager.Instance?.SpawnPlasmaExplosion(transform.position);
                     TimeManager.Instance?.TriggerSlowMotion(2.5f);
                     pool?.ReturnObstacleToPool(gameObject);
+                    return;
+                }
+
+                // Safety grace buffer: if player collides with fence while holding/pressing jump, execute fence jump instead of death
+                if (obsBehavior != null && pa != null && pa.HasNearbyFence() && Input.GetKey(KeyCode.Space))
+                {
+                    obsBehavior.PerformFenceJump(playerObj);
                     return;
                 }
 

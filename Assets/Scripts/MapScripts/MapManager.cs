@@ -13,6 +13,11 @@ public class MapManager : MonoBehaviour
     public bool startImmediately = true;
     public float defaultDestroyDelay = 2f;
 
+    [Header("Dynamic Generation Settings")]
+    public Transform playerTransform;
+    [Tooltip("Minimum distance (meters) to maintain generated road ahead of the player.")]
+    public float minSpawnAheadDistance = 600f;
+
     [Header("References")]
     public CarSpawnerPool carSpawner;
     public PowerSpawner powerSpawner;
@@ -28,6 +33,12 @@ public class MapManager : MonoBehaviour
         {
             Debug.LogError("[MapManager] mapPrefab is not assigned!");
             return;
+        }
+
+        if (playerTransform == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p) playerTransform = p.transform;
         }
 
         if (autoDetectLength)
@@ -51,6 +62,24 @@ public class MapManager : MonoBehaviour
         {
             for (int i = 0; i < 8; i++)
                 SpawnNextMap();
+        }
+    }
+
+    void Update()
+    {
+        if (playerTransform == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) playerTransform = p.transform;
+        }
+
+        // Dynamically spawn new map sections ahead of the player to ensure they never catch up or fall out of the world
+        if (playerTransform != null && mapPrefab != null)
+        {
+            while (currentZ - playerTransform.position.z < minSpawnAheadDistance)
+            {
+                SpawnNextMap();
+            }
         }
     }
 

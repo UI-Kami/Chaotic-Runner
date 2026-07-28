@@ -67,7 +67,7 @@ public class SwordPower : MonoBehaviour
         if (slashClip == null)
             return;
 
-        AudioSource.PlayClipAtPoint(slashClip, position, slashVolume);
+        AudioManager.PlaySFX2D(slashClip, slashVolume);
     }
 
     private GameObject ResolveRingPrefab()
