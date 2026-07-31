@@ -106,8 +106,8 @@ public class MeteoriteDestroyer : MonoBehaviour
                 return;
             }
 
-            // If Test Mode is active, do not apply knockback or kill the player. Just play impact and destroy meteor.
-            if (GameMode.IsTestMode)
+            // If Cinematic or Test Mode is active, do not apply knockback or kill the player. Just play impact and destroy meteor.
+            if (GameMode.IsCinematic || GameMode.IsTestMode)
             {
                 HandleImpact();
                 return;

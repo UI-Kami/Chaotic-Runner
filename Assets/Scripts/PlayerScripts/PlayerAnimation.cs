@@ -358,6 +358,13 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (isDead) return;
 
+        // If Cinematic mode is active, the player should never die — ignore all death calls.
+        if (GameMode.IsCinematic)
+        {
+            Debug.Log("Cinematic mode active: ignoring death.");
+            return;
+        }
+
         // If Test Mode is active we should not actually die — keep gameplay flowing for testing.
         if (GameMode.IsTestMode)
         {
