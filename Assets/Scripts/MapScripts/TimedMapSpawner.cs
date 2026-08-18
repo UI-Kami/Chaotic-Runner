@@ -41,9 +41,11 @@ public class TimedMapSpawner : MonoBehaviour
         // small initial delay so scenes that create initial maps have time to finish setup
         if (initialDelay > 0f) yield return new WaitForSeconds(initialDelay);
 
+        var wait = new WaitForSeconds(Mathf.Max(0.01f, spawnInterval));
+
         while (true)
         {
-            yield return new WaitForSeconds(Mathf.Max(0.01f, spawnInterval));
+            yield return wait;
 
             if (!enableSpawning || mapManager == null) continue;
 

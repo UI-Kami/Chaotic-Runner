@@ -13,9 +13,18 @@ public class MeteoriteDestroyer : MonoBehaviour
         public float areaBlastRadius = 8f;
 
         private bool hasImpacted = false;
+        private static readonly Collider[] blastHitsBuffer = new Collider[32];
 
         // reference to the SkyDarkener instance (set when spawned)
         public SkyDarkener_Builtin skyDarkener;
+        private RoadObstacles cachedRoadObsManager;
+
+        void Start()
+        {
+            if (skyDarkener == null)
+                skyDarkener = FindObjectOfType<SkyDarkener_Builtin>();
+            cachedRoadObsManager = FindObjectOfType<RoadObstacles>();
+        }
 
         void Update()
         {
@@ -41,14 +50,18 @@ public class MeteoriteDestroyer : MonoBehaviour
             ExplosionManager.Instance?.SpawnMeteorExplosion(impactPos);
             if (CameraShake.Instance != null)
                 CameraShake.Instance.ShakeCamera(shakeIntensity, shakeDuration);
-            // Destroy nearby obstacles and cars within blast radius
+            // Destroy nearby obstacles and cars within blast radius without allocating garbage
             if (areaBlastRadius > 0f)
             {
-                Collider[] hits = Physics.OverlapSphere(impactPos, areaBlastRadius);
-                var roadObsManager = FindObjectOfType<RoadObstacles>();
+                int hitCount = Physics.OverlapSphereNonAlloc(impactPos, areaBlastRadius, blastHitsBuffer);
+                if (cachedRoadObsManager == null)
+                    cachedRoadObsManager = FindObjectOfType<RoadObstacles>();
 
-                foreach (var c in hits)
+                for (int i = 0; i < hitCount; i++)
                 {
+                    Collider c = blastHitsBuffer[i];
+                    blastHitsBuffer[i] = null; // Clear reference for GC hygiene
+
                     if (c == null || c.gameObject == null) continue;
 
                     // Destroy/return obstacles found
@@ -58,8 +71,8 @@ public class MeteoriteDestroyer : MonoBehaviour
                         // Play meteor explosion sound at obstacle (no additional VFX)
                         ExplosionSoundManager.Instance?.PlayMeteorExplosion(cleanup.transform.position);
                         // Return obstacle to pool via manager (if available)
-                        if (roadObsManager != null)
-                            roadObsManager.ReturnObstacleToPool(cleanup.gameObject);
+                        if (cachedRoadObsManager != null)
+                            cachedRoadObsManager.ReturnObstacleToPool(cleanup.gameObject);
                         else
                             Destroy(cleanup.gameObject);
                         continue;
@@ -77,7 +90,6 @@ public class MeteoriteDestroyer : MonoBehaviour
             }
 
             Destroy(gameObject, DestroyDelay);
-            
         }
 
         private void HandlePlayerCollision(GameObject playerObj, Collision collision = null)

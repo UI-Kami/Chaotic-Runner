@@ -49,8 +49,6 @@ public class PowerSpawner : MonoBehaviour
         // Get actual map bounds to ensure spawns are within the physical map
         GetMapBounds(map, out float actualMapStartZ, out float actualMapEndZ);
 
-        Debug.Log($"PowerSpawner: SpawnPowersOnMap called for map={map.name} originalZRange={mapStartZ:F1}-{mapEndZ:F1} actualZRange={actualMapStartZ:F1}-{actualMapEndZ:F1} (powerPrefab={(powerPrefab!=null)}, swordPrefab={(swordPrefab!=null)}, debuffPrefab={(debuffPrefab!=null)}), swordChance={swordSpawnChance}, debuffChance={debuffSpawnChance}");
-
         int count = Random.Range(2, 4);
         for (int i = 0; i < count; i++)
         {
@@ -93,33 +91,23 @@ public class PowerSpawner : MonoBehaviour
             bool isDebuff = false;
             GameObject power = null;
 
-            // If the configured spawn chances can overlap, log a helpful message to clarify selection order.
-            if (swordSpawnChance + debuffSpawnChance > 1f)
-            {
-                Debug.LogWarning($"PowerSpawner: swordSpawnChance + debuffSpawnChance > 1.0 (={swordSpawnChance + debuffSpawnChance:F2}). Debuff is checked first and may take precedence.");
-            }
-
             float r = Random.value;
-            Debug.Log($"PowerSpawner: roll={r:F3} (swordChance={swordSpawnChance:F2}, debuffChance={debuffSpawnChance:F2})");
 
             // Check debuff first so that debuffs get a chance even when swordChance is high.
             if (debuffPrefab != null && r < debuffSpawnChance)
             {
                 power = Instantiate(debuffPrefab);
                 isDebuff = true;
-                Debug.Log($"PowerSpawner: chose DEBUFF at {spawnPos}");
             }
             else if (swordPrefab != null && r < debuffSpawnChance + swordSpawnChance)
             {
                 power = Instantiate(swordPrefab);
                 isSword = true;
-                Debug.Log($"PowerSpawner: chose SWORD at {spawnPos}");
             }
             else
             {
                 if (powerPrefab == null && powerPool.Count == 0)
                 {
-                    Debug.Log($"PowerSpawner: falling back but no regular power prefab/pool available — skipping this spawn slot");
                     continue; // skip this spawn attempt if no regular power available
                 }
                 power = powerPool.Count > 0 ? powerPool.Dequeue() : Instantiate(powerPrefab);
@@ -133,16 +121,22 @@ public class PowerSpawner : MonoBehaviour
             power.transform.position = spawnPos;
             power.transform.rotation = Quaternion.identity;
 
-            string spawnType = isSword ? "Sword" : (isDebuff ? "Debuff" : "Power");
-            Debug.Log($"PowerSpawner: Spawned {spawnType} '{power.name}' at {spawnPos} (map={map.name})");
-
             PowerCleanup cleaner = power.GetComponent<PowerCleanup>();
             if (cleaner == null) cleaner = power.AddComponent<PowerCleanup>();
             cleaner.fallDestroyY = powerFallDestroyY;
             cleaner.SetPoolReference(this);
-            cleaner.mapAssociation = map; // track which map spawned this power for debugging
+            cleaner.mapAssociation = map;
+
+            if (!mapPowers.TryGetValue(map, out var list))
+            {
+                list = new List<GameObject>();
+                mapPowers[map] = list;
+            }
+            list.Add(power);
         }
     }
+
+    private readonly Dictionary<GameObject, List<GameObject>> mapPowers = new();
 
     public void ReturnPowerToPool(GameObject power)
     {
@@ -169,21 +163,19 @@ public class PowerSpawner : MonoBehaviour
     }
 
     // Return all powers associated with a map back to the pool
-    // (Powers are no longer children of the map, so we check if they were spawned on this map)
     public void ReturnPowersOnMap(GameObject map)
     {
         if (map == null) return;
-        
-        // Find all active powers and check their map association
-        PowerCleanup[] allCleans = FindObjectsOfType<PowerCleanup>(false);
-        foreach (var c in allCleans)
+
+        if (mapPowers.TryGetValue(map, out var powerList))
         {
-            if (c == null || c.gameObject == null) continue;
-            // Only return powers that were explicitly spawned on this map
-            if (c.mapAssociation == map)
+            for (int i = powerList.Count - 1; i >= 0; i--)
             {
-                ReturnPowerToPool(c.gameObject);
+                if (powerList[i] != null)
+                    ReturnPowerToPool(powerList[i]);
             }
+            powerList.Clear();
+            mapPowers.Remove(map);
         }
     }
 
@@ -270,7 +262,5 @@ public class PowerSpawner : MonoBehaviour
             startZ = map.transform.position.z;
             endZ = map.transform.position.z + 200f; // default map length
         }
-
-        Debug.Log($"PowerSpawner: Map bounds calculated: {startZ:F1} to {endZ:F1} (length: {endZ - startZ:F1})");
     }
 }

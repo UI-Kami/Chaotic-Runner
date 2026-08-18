@@ -153,7 +153,6 @@ public class ObstacleBehaviorScript : MonoBehaviour
                     // FIRE: trigger animation and apply impulse now (auto behavior)
                     PerformFenceJump(playerObj);
                     lastTriggeredTime = Time.time;
-                    Debug.Log($"Fence jump triggered for player by {name} at time {Time.time} (ray {i + 1}/{rayCount})");
                 }
 
                 // One hit is enough per detection (either registration only or auto-trigger)

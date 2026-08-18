@@ -39,6 +39,8 @@ public class PlayerAnimation : MonoBehaviour
     private bool isRolling = false;
     private bool isDead = false;
 
+    private CharacterController characterController;
+
     private float sprintTimer = 0f;
     private float slideTimer = 0f;
     private float slideCooldownTimer = 0f;
@@ -74,6 +76,8 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (animator == null) animator = GetComponent<Animator>();
         if (movement == null) movement = GetComponent<PlayerMovement>();
+        if (characterController == null) characterController = GetComponent<CharacterController>();
+        if (characterController == null && movement != null) characterController = movement.GetComponent<CharacterController>();
     }
 
     void Update()
@@ -124,7 +128,7 @@ public class PlayerAnimation : MonoBehaviour
             return;
         }
 
-        if (slideCooldownTimer <= 0f && movement.GetComponent<CharacterController>().isGrounded)
+        if (slideCooldownTimer <= 0f && characterController != null && characterController.isGrounded)
         {
             if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.S))
                 StartSlide();
@@ -152,7 +156,7 @@ public class PlayerAnimation : MonoBehaviour
     //         return;
     //     }
 
-    //     if (rollCooldownTimer <= 0f && movement.GetComponent<CharacterController>().isGrounded)
+    //     if (rollCooldownTimer <= 0f && characterController != null && characterController.isGrounded)
     //     {
     //         if (Input.GetKeyDown(KeyCode.R))
     //             StartRoll();
@@ -172,8 +176,7 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (isDead) return;
 
-        var controller = movement.GetComponent<CharacterController>();
-        bool grounded = controller.isGrounded;
+        bool grounded = characterController != null && characterController.isGrounded;
 
         if (Input.GetKeyDown(KeyCode.Space) && !isSliding && !isRolling && jumpLockTimer <= 0f)
         {
@@ -260,9 +263,9 @@ public class PlayerAnimation : MonoBehaviour
     {
         if (isDead) return;
 
-        var controller = movement.GetComponent<CharacterController>();
+        bool grounded = characterController != null && characterController.isGrounded;
 
-        if (isSliding || isRolling || !controller.isGrounded)
+        if (isSliding || isRolling || !grounded)
         {
             animator.SetBool("isRunningLeft", false);
             animator.SetBool("isRunningRight", false);
@@ -298,7 +301,6 @@ public class PlayerAnimation : MonoBehaviour
         if (animator != null)
         {
             TriggerFenceJumpRandom();
-            Debug.Log("TriggerFenceJump called — firing randomized fence-jump trigger");
         }
     }
 
@@ -309,7 +311,6 @@ public class PlayerAnimation : MonoBehaviour
         if (animator == null) return;
 
         animator.SetTrigger("swordSlash");
-        Debug.Log("TriggerSwordSlash fired");
     }
 
     // Choose a random fence-jump trigger name from `fenceJumpTriggers` and fire it.
@@ -329,7 +330,6 @@ public class PlayerAnimation : MonoBehaviour
         }
 
         animator.SetTrigger(triggerName);
-        Debug.Log($"TriggerFenceJumpRandom fired trigger '{triggerName}'");
     }
 
     // Called by obstacles when the player enters/maintains detection. Only stores the reference.

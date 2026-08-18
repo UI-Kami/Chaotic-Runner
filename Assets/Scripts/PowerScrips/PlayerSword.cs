@@ -134,8 +134,6 @@ public class PlayerSword : MonoBehaviour
         }
         // Activate the hitbox so it only acts when owned by the player (prevents world instances from triggering)
         sb.ActivateForPlayer();
-
-        Debug.Log($"PlayerSword: Spawned ring '{ringInstance.name}' at {ringInstance.transform.position} parent={(ringInstance.transform.parent!=null?ringInstance.transform.parent.name:"null")} for {duration} seconds.");
     }
 
     public void DeactivateSword()

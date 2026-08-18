@@ -110,8 +110,18 @@ public class RoadObstacles : MonoBehaviour
             var cleanup = EnsureCleanup(obs);
             cleanup.SetPool(this);
             cleanup.mapAssociation = map;
+
+            if (!mapObstacles.TryGetValue(map, out var list))
+            {
+                list = new List<GameObject>();
+                mapObstacles[map] = list;
+            }
+            list.Add(obs);
         }
     }
+
+    // Track obstacles per map tile for instant lookup without FindObjectsOfType
+    private readonly Dictionary<GameObject, List<GameObject>> mapObstacles = new();
 
     /// <summary>
     /// Return a particular obstacle to the pool (safe unparent + disable).
@@ -148,17 +158,16 @@ public class RoadObstacles : MonoBehaviour
     public void ReturnObstaclesOnMap(GameObject map)
     {
         if (map == null) return;
-        
-        // Find all active obstacles and check their map association
-        ObstacleCleanup[] allCleans = FindObjectsOfType<ObstacleCleanup>(false);
-        foreach (var c in allCleans)
+
+        if (mapObstacles.TryGetValue(map, out var obsList))
         {
-            if (c == null || c.gameObject == null) continue;
-            // Only return obstacles that were explicitly spawned on this map
-            if (c.mapAssociation == map)
+            for (int i = obsList.Count - 1; i >= 0; i--)
             {
-                ReturnObstacleToPool(c.gameObject);
+                if (obsList[i] != null)
+                    ReturnObstacleToPool(obsList[i]);
             }
+            obsList.Clear();
+            mapObstacles.Remove(map);
         }
     }
 
@@ -373,7 +382,5 @@ public class RoadObstacles : MonoBehaviour
             startZ = map.transform.position.z;
             endZ = map.transform.position.z + 200f; // default map length
         }
-
-        Debug.Log($"RoadObstacles: Map bounds calculated: {startZ:F1} to {endZ:F1} (length: {endZ - startZ:F1})");
     }
 }

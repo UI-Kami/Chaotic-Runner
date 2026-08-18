@@ -79,6 +79,7 @@ public class ScoreManager : MonoBehaviour
 
     public void ResetScore()
     {
+        SaveData();
         score = 0f;
         UpdateUI();
     }
@@ -94,12 +95,21 @@ public class ScoreManager : MonoBehaviour
         if (score > highScore)
         {
             highScore = score;
-            SaveData();
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        SaveData();
+    }
+
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause) SaveData();
+    }
+
     // ----------------- Persistence -----------------
-    private void SaveData()
+    public void SaveData()
     {
         try
         {

@@ -27,6 +27,9 @@ public class MapManager : MonoBehaviour
     private float currentZ;
     public readonly List<GameObject> activeMaps = new();
 
+    private TimedMapSpawner cachedTimedMapSpawner;
+    private DrunkCarSpawner cachedDrunkCarSpawner;
+
     void Start()
     {
         if (mapPrefab == null)
@@ -55,6 +58,9 @@ public class MapManager : MonoBehaviour
         if (roadObstacles == null)
             roadObstacles = FindAnyObjectByType<RoadObstacles>();
 
+        cachedTimedMapSpawner = FindAnyObjectByType<TimedMapSpawner>() ?? GetComponent<TimedMapSpawner>();
+        cachedDrunkCarSpawner = FindAnyObjectByType<DrunkCarSpawner>();
+
         powerSpawner?.InitializePowerPool();
         roadObstacles?.InitializePool();
 
@@ -67,12 +73,6 @@ public class MapManager : MonoBehaviour
 
     void Update()
     {
-        if (playerTransform == null)
-        {
-            GameObject p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) playerTransform = p.transform;
-        }
-
         // Dynamically spawn new map sections ahead of the player to ensure they never catch up or fall out of the world
         if (playerTransform != null && mapPrefab != null)
         {
@@ -80,6 +80,11 @@ public class MapManager : MonoBehaviour
             {
                 SpawnNextMap();
             }
+        }
+        else if (playerTransform == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) playerTransform = p.transform;
         }
     }
 
@@ -99,12 +104,13 @@ public class MapManager : MonoBehaviour
         MapEndTrigger endTrigger = newMap.GetComponentInChildren<MapEndTrigger>();
         if (endTrigger != null)
         {
-            endTrigger.spawner = FindAnyObjectByType<TimedMapSpawner>() ?? gameObject.GetComponent<TimedMapSpawner>();
+            if (cachedTimedMapSpawner == null)
+                cachedTimedMapSpawner = FindAnyObjectByType<TimedMapSpawner>() ?? GetComponent<TimedMapSpawner>();
+            endTrigger.spawner = cachedTimedMapSpawner;
             endTrigger.destroyDelay = defaultDestroyDelay;
         }
 
         bool suppressed = GameMode.IsInitialSpawnSuppressed;
-        Debug.Log($"MapManager: SpawnNextMap called for {newMap.name} suppressed={suppressed} powerSpawnerAssigned={(powerSpawner!=null)}");
 
         if (carSpawner != null && !suppressed)
         {
@@ -112,14 +118,16 @@ public class MapManager : MonoBehaviour
             for (int i = 0; i < carCount; i++)
                 carSpawner.SpawnCarOnMap(mapStartZ, mapEndZ);
 
-            FindAnyObjectByType<DrunkCarSpawner>()?.OnNewMapSpawned(mapStartZ, mapEndZ);
+            if (cachedDrunkCarSpawner == null)
+                cachedDrunkCarSpawner = FindAnyObjectByType<DrunkCarSpawner>();
+            cachedDrunkCarSpawner?.OnNewMapSpawned(mapStartZ, mapEndZ);
         }
 
         // spawn powers and obstacles via dedicated managers (if assigned)
         if (!suppressed)
         {
             powerSpawner?.SpawnPowersOnMap(newMap, mapStartZ, mapEndZ);
-            roadObstacles?.SpawnObstaclesForMap(newMap, powerSpawner != null ? powerSpawner.lanePositions : new float[0], mapStartZ, mapEndZ);
+            roadObstacles?.SpawnObstaclesForMap(newMap, powerSpawner != null ? powerSpawner.lanePositions : System.Array.Empty<float>(), mapStartZ, mapEndZ);
         }
     }
 

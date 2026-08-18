@@ -87,7 +87,5 @@ public class MeteoriteSpawner : MonoBehaviour
             destroyer.skyDarkener = skyDarkener;
             skyDarkener?.RegisterMeteor();
         }
-
-        Debug.Log($"☄️ Meteorite wave launched ({meteorCount} meteors)");
     }
 }

@@ -29,9 +29,6 @@ public class SwordHitBox : MonoBehaviour
 
         if (other.CompareTag("Player")) return;
 
-        // Debug hit for tracing
-        Debug.Log($"SwordHitBox: Hit object={other.name} tag={other.tag} active={isActive}");
-
         // If this is a pooled obstacle, use its cleanup handler (it will spawn plasma and handle slow-motion)
         var cleanup = other.GetComponentInParent<RoadObstacles.ObstacleCleanup>();
         if (cleanup != null)

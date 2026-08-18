@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DrunkCarSpawner : MonoBehaviour
@@ -74,7 +74,6 @@ public class DrunkCarSpawner : MonoBehaviour
         }
 
         activeDrunkCars.Add(drunk);
-        Debug.Log($"🚗💥 [DrunkCarSpawner] Drunk car spawned at {spawnPos}");
     }
 
     private void CleanupDestroyedCars()
